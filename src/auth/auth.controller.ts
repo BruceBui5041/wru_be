@@ -1,11 +1,11 @@
 import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
-import { SignUpValidationPipe } from './custom-validators/signup.validator';
+import { SignUpValidationPipe } from './pipes/signup.pipe';
 import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { GetUser } from './get-user.decorator';
-import { User } from './user.entity';
+import { User } from '../user/user.entity';
 
 @Controller('auth')
 export class AuthController {

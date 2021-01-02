@@ -1,6 +1,5 @@
-import { createParamDecorator, ExecutionContext, Inject } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AuthService } from '../auth.service';
 
 export const GetJwtToken = createParamDecorator((data: string, context: ExecutionContext) => {
   const ctx = GqlExecutionContext.create(context);

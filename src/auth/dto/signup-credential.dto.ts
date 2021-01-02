@@ -1,7 +1,4 @@
-import { Equals, IsString, Matches, MinLength } from 'class-validator';
-import { isEqual } from 'graphql-tools';
-import { SignUpValidationPipe } from '../custom-validators/signup.validator';
-
+import { IsString, MinLength } from 'class-validator';
 export class SignUpCredentialDto {
   @IsString({ message: `username.${'Must be a string'}` })
   @MinLength(6, { message: `username.${'Username or Email must at least 6 charaters'}` })

@@ -4,9 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { JwtPayload } from './jwt-payload.interface';
-import { User } from './user.entity';
-import { UserGraphQLType } from './user.gql.type';
-import { UserRepository } from './user.repository';
+import { User } from '../user/user.entity';
+import { UserRepository } from '../user/user.repository';
 
 @Injectable()
 export class AuthService {
@@ -22,27 +21,32 @@ export class AuthService {
     /**
      * If user sign up success then auto sign in
      */
-    return this.signIn({ username, password });
+    const res = await this.signIn({ username, password });
+    return res;
   }
 
   async signIn(authCrendentialsDto: SignInCredentialDto): Promise<{ accessToken: string }> {
-    const result = await this.userRepository.validatePassword(authCrendentialsDto);
-    if (!result?.username) throw new UnauthorizedException(['Invalid username or password']);
+    const user = await this.userRepository.validatePassword(authCrendentialsDto);
+    if (!user?.username) throw new UnauthorizedException(['Invalid username or password']);
 
-    const payload: JwtPayload = { uuid: result.uuid, username: result.username };
+    const payload: JwtPayload = { uuid: user.uuid, username: user.username };
     const accessToken = await this.jwtService.sign(payload);
+
+    await this.userRepository.update(user.uuid, { token: accessToken });
 
     return { accessToken };
   }
 
-  async getUserInfoByUUID(userUUID: string): Promise<UserGraphQLType> {
-    const result = await this.userRepository.getPublicInfo(userUUID);
-    if (!result) throw new NotFoundException();
-    return result;
+  async isMatchStoragedToken(sentToken: string): Promise<boolean> {
+    const { uuid } = this.jwtService.verify(sentToken) as JwtPayload;
+    if (uuid) {
+      const user = await this.userRepository.findOne({ uuid });
+      return user.token == sentToken;
+    }
+    return false;
   }
 
-  async parseTokenToInfomation(token: string): Promise<JwtPayload> {
-    const payload: JwtPayload = await this.jwtService.verify(token);
-    return payload;
+  async getUserProfile(user: User): Promise<User> {
+    return user;
   }
 }

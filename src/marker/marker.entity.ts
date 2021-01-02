@@ -1,7 +1,6 @@
-import { IsIn, IsUUID } from 'class-validator';
+import { IsIn, IsNumber, IsUUID, Max, Min } from 'class-validator';
 import { User } from '../user/user.entity';
-import { Group } from '../group/group.entity';
-import { Marker } from '../marker/marker.entity';
+import { Jouney } from '../jouney/jouney.entity';
 import {
   BaseEntity,
   Column,
@@ -9,18 +8,29 @@ import {
   Generated,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('jouneys')
-export class Jouney extends BaseEntity {
+@Entity('markers')
+export class Marker extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   uuid: string;
 
   @Column()
   title: string;
+
+  @Column()
+  @IsNumber()
+  @Max(180)
+  @Min(-180)
+  lng: number;
+
+  @Column()
+  @IsNumber()
+  @Max(90)
+  @Min(-90)
+  lat: number;
 
   @Column()
   @IsIn(['public', 'private'])
@@ -34,15 +44,9 @@ export class Jouney extends BaseEntity {
   owner: User;
 
   @ManyToOne(
-    () => Group,
-    group => group.jouney,
+    () => Jouney,
+    jouney => jouney.markers,
   )
-  @JoinColumn({ name: 'groupUuid' })
-  group: Group;
-
-  @OneToMany(
-    () => Marker,
-    marker => marker.jouney,
-  )
-  markers: Marker[];
+  @JoinColumn({ name: 'jouneyUuid' })
+  jouney: Jouney;
 }

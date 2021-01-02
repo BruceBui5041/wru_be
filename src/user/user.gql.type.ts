@@ -1,4 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { UserProfile } from './user-profile.entity';
+import { UserProfileGraphQLType } from './user-profile.gql.type';
 
 @ObjectType('User')
 export class UserGraphQLType {
@@ -11,9 +13,6 @@ export class UserGraphQLType {
   @Field({ nullable: true })
   email: string;
 
-  @Field({ nullable: true })
-  phoneNumber: string;
-
-  @Field({ nullable: true })
-  imageUrl: string;
+  @Field(() => UserProfileGraphQLType, { nullable: true })
+  profile: UserProfile;
 }
