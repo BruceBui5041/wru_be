@@ -1,8 +1,17 @@
 import { IsUUID } from 'class-validator';
 import * as bcrypt from 'bcrypt';
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Group } from '../group/group.entity';
-import { Expose } from 'class-transformer';
+import { Invitation } from 'src/invitations/invitation.entity';
+import { JoinInRequest } from 'src/join-in-request/join-in-request.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -23,7 +32,7 @@ export class User extends BaseEntity {
 
   private _token: string;
 
-  @Column({ name: 'token', nullable: true })
+  @Column({ type: 'text', name: 'token', nullable: true })
   public get token(): string {
     return this._token;
   }
@@ -34,7 +43,7 @@ export class User extends BaseEntity {
 
   private _refreshToken: string;
 
-  @Column({ name: 'refreshToken', nullable: true })
+  @Column({ type: 'text', name: 'refreshToken', nullable: true })
   public get refreshToken(): string {
     return this._refreshToken;
   }
@@ -100,7 +109,38 @@ export class User extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
+  private _createdAt: Date;
 
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public set createdAt(value: Date) {
+    this._createdAt = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _updatedAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  public set updatedAt(value: Date) {
+    this._updatedAt = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
   private _groups: Group[];
 
   @OneToMany(
@@ -114,6 +154,37 @@ export class User extends BaseEntity {
 
   public set groups(value: Group[]) {
     this._groups = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _invitations: Invitation[];
+
+  @OneToMany(
+    () => Invitation,
+    invitation => invitation.owner,
+  )
+  public get invitations(): Invitation[] {
+    return this._invitations;
+  }
+  public set invitations(value: Invitation[]) {
+    this._invitations = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _joinInRequest: JoinInRequest[];
+  @OneToMany(
+    () => JoinInRequest,
+    joinInRequest => joinInRequest.owner,
+  )
+  public get joinInRequests(): JoinInRequest[] {
+    return this._joinInRequest;
+  }
+  public set joinInRequests(value: JoinInRequest[]) {
+    this._joinInRequest = value;
   }
 
   async validatePassword(password: string): Promise<boolean> {

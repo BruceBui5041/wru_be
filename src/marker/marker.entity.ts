@@ -4,11 +4,12 @@ import { Jouney } from '../jouney/jouney.entity';
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
-  Generated,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('markers')
@@ -32,9 +33,41 @@ export class Marker extends BaseEntity {
   @Min(-90)
   lat: number;
 
-  @Column()
+  @Column('enum', { enum: ['public', 'private'] })
   @IsIn(['public', 'private'])
   visibility: string;
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _createdAt: Date;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public set createdAt(value: Date) {
+    this._createdAt = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _updatedAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  public set updatedAt(value: Date) {
+    this._updatedAt = value;
+  }
 
   @ManyToOne(
     () => User,

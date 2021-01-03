@@ -4,7 +4,6 @@ import { EntityRepository, Repository } from 'typeorm';
 import { SignInCredentialDto } from '../auth/dto/signin-credential.dto';
 import { User } from './user.entity';
 import { SignUpCredentialDto } from '../auth/dto/signup-credential.dto';
-import { IsUUID } from 'class-validator';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {

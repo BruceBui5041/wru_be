@@ -4,15 +4,15 @@ import { Jouney } from '../jouney/jouney.entity';
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
-  Generated,
   JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity('groups')
@@ -25,10 +25,10 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-  @PrimaryGeneratedColumn('uuid', { name: 'uuid' })
-  @IsUUID()
   private _uuid: string;
 
+  @PrimaryGeneratedColumn('uuid', { name: 'uuid' })
+  @IsUUID()
   public get uuid(): string {
     return this._uuid;
   }
@@ -82,6 +82,38 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
+  private _createdAt: Date;
+
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  public get createdAt(): Date {
+    return this._createdAt;
+  }
+
+  public set createdAt(value: Date) {
+    this._createdAt = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
+  private _updatedAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    onUpdate: 'CURRENT_TIMESTAMP(6)',
+  })
+  public get updatedAt(): Date {
+    return this._updatedAt;
+  }
+
+  public set updatedAt(value: Date) {
+    this._updatedAt = value;
+  }
+
+  /**
+   * -----------------------------------------------------
+   */
   @ManyToOne(
     () => User,
     user => user.groups,
@@ -114,9 +146,10 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-  @OneToOne(() => Jouney, { onDelete: 'SET NULL' })
   private _jouney: Jouney;
 
+  @OneToOne(() => Jouney, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'jouneyUuid' })
   public get jouney(): Jouney {
     return this._jouney;
   }
@@ -124,12 +157,4 @@ export class Group extends BaseEntity {
   public set jouney(value: Jouney) {
     this._jouney = value;
   }
-
-  public addNewMember = (newMember: User) => {
-    this.members.push(newMember);
-  };
-
-  public removeMember = (removedMember: User) => {
-    this._members = this.members.filter(member => member.uuid != removedMember.uuid);
-  };
 }
