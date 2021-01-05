@@ -23,15 +23,13 @@ export enum InvitationStatus {
 
 @Entity('invitations')
 export class Invitation extends BaseEntity {
-  constructor(owner: User, invitedUser: User, inviterGroup: Group) {
+  constructor(owner: User, invitedUser: User, group: any) {
     super();
     this.owner = owner;
-    this.ownerGroup = inviterGroup;
+    this.group = group;
     this.invitedUser = invitedUser;
   }
-
   private _uuid: string;
-
   @PrimaryGeneratedColumn('uuid', { name: 'uuid' })
   @IsUUID()
   public get uuid(): string {
@@ -42,7 +40,6 @@ export class Invitation extends BaseEntity {
   }
 
   private _owner: User;
-
   @ManyToOne(
     () => User,
     user => user.invitations,
@@ -54,54 +51,50 @@ export class Invitation extends BaseEntity {
     this._owner = value;
   }
 
-  private _ownerGroup: Group;
+  private _group: Group;
 
-  @OneToOne(() => Group)
+  @ManyToOne(
+    () => Group,
+    group => group.invitatons,
+  )
   @JoinColumn({ name: 'groupUuid' })
-  public get ownerGroup(): Group {
-    return this._ownerGroup;
+  public get group(): Group {
+    return this._group;
   }
-
-  public set ownerGroup(value: Group) {
-    this._ownerGroup = value;
+  public set group(value: Group) {
+    this._group = value;
   }
 
   private _invitedUser: User;
 
-  @OneToOne(() => User)
+  @ManyToOne(
+    () => User,
+    user => user.invitations,
+  )
   @JoinColumn({ name: 'invidedUserUuid' })
   public get invitedUser(): User {
     return this._invitedUser;
   }
-
   public set invitedUser(value: User) {
     this._invitedUser = value;
   }
-
   private _status: InvitationStatus;
-
   @Column('enum', { enum: InvitationStatus, default: InvitationStatus.PENDING, name: 'status' })
   public get status(): InvitationStatus {
     return this._status;
   }
-
   public set status(value: InvitationStatus) {
     this._status = value;
   }
-
   private _createdAt: Date;
-
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
   public get createdAt(): Date {
     return this._createdAt;
   }
-
   public set createdAt(value: Date) {
     this._createdAt = value;
   }
-
   private _updatedAt: Date;
-
   @UpdateDateColumn({
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
@@ -110,7 +103,6 @@ export class Invitation extends BaseEntity {
   public get updatedAt(): Date {
     return this._updatedAt;
   }
-
   public set updatedAt(value: Date) {
     this._updatedAt = value;
   }

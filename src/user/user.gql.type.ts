@@ -5,7 +5,7 @@ import { UserProfileGraphQLType } from './user-profile.gql.type';
 @ObjectType('User')
 export class UserGraphQLType {
   @Field()
-  id: number;
+  uuid: string;
 
   @Field()
   username: string;

@@ -8,5 +8,9 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: 'root',
   database: 'wru_dev',
   entities: [__dirname + '/../**/*.entity.{js,ts}'],
+  migrations: ['migration/*.js'],
+  cli: {
+    migrationsDir: 'migration',
+  },
   synchronize: true,
 };

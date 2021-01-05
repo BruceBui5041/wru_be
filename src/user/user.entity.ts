@@ -10,8 +10,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Group } from '../group/group.entity';
-import { Invitation } from 'src/invitations/invitation.entity';
-import { JoinInRequest } from 'src/join-in-request/join-in-request.entity';
+import { JoinInRequest } from '../join-in-request/join-in-request.entity';
+import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -168,6 +168,7 @@ export class User extends BaseEntity {
   public get invitations(): Invitation[] {
     return this._invitations;
   }
+
   public set invitations(value: Invitation[]) {
     this._invitations = value;
   }
@@ -176,6 +177,7 @@ export class User extends BaseEntity {
    * -----------------------------------------------------
    */
   private _joinInRequest: JoinInRequest[];
+
   @OneToMany(
     () => JoinInRequest,
     joinInRequest => joinInRequest.owner,
@@ -183,6 +185,7 @@ export class User extends BaseEntity {
   public get joinInRequests(): JoinInRequest[] {
     return this._joinInRequest;
   }
+
   public set joinInRequests(value: JoinInRequest[]) {
     this._joinInRequest = value;
   }

@@ -1,6 +1,6 @@
 import { IsUUID } from 'class-validator';
-import { Group } from 'src/group/group.entity';
-import { User } from 'src/user/user.entity';
+import { Group } from '../group/group.entity';
+import { User } from '../user/user.entity';
 import {
   BaseEntity,
   Column,

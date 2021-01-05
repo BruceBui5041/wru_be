@@ -3,7 +3,7 @@ import { InternalServerErrorException, NotFoundException } from '@nestjs/common'
 import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './group.entity';
 import { User } from '../user/user.entity';
-import { UserRepository } from 'src/user/user.repository';
+import { UserRepository } from '../user/user.repository';
 
 @EntityRepository(Group)
 export class GroupRepository extends Repository<Group> {

@@ -5,7 +5,7 @@ import { JouneyGraphQLType } from '../jouney/jouney.gql.type';
 @ObjectType('Group')
 export class GroupGraphQLType {
   @Field()
-  id: number;
+  uuid: string;
 
   @Field()
   groupName: string;

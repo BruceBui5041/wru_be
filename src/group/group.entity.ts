@@ -10,10 +10,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('groups')
 export class Group extends BaseEntity {
@@ -156,5 +158,18 @@ export class Group extends BaseEntity {
 
   public set jouney(value: Jouney) {
     this._jouney = value;
+  }
+
+  private _invitatons: Invitation[];
+
+  @OneToMany(
+    () => Invitation,
+    invitation => invitation.group,
+  )
+  public get invitatons(): Invitation[] {
+    return this._invitatons;
+  }
+  public set invitatons(value: Invitation[]) {
+    this._invitatons = value;
   }
 }
