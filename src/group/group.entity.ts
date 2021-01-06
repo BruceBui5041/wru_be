@@ -116,16 +116,13 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
+  private _owner: User;
+
   @ManyToOne(
     () => User,
     user => user.groups,
+    { eager: true },
   )
-  /**
-   * Use JoinColumn to rename the foreign key
-   */
-  @JoinColumn({ name: 'ownerUuid' })
-  private _owner: User;
-
   public get owner(): User {
     return this._owner;
   }
@@ -137,10 +134,11 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-  @ManyToMany(() => User)
-  @JoinTable({ name: 'group_users_user' })
+
   private _members: User[];
 
+  @ManyToMany(() => User)
+  @JoinTable({ name: 'group_users_user' })
   public get members(): User[] {
     return this._members;
   }
@@ -160,11 +158,15 @@ export class Group extends BaseEntity {
     this._jouney = value;
   }
 
+  /**
+   * -----------------------------------------------------
+   */
   private _invitatons: Invitation[];
 
   @OneToMany(
     () => Invitation,
     invitation => invitation.group,
+    { onDelete: 'CASCADE' },
   )
   public get invitatons(): Invitation[] {
     return this._invitatons;

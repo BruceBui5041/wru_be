@@ -31,7 +31,6 @@ export class AuthService {
 
     const payload: JwtPayload = { uuid: user.uuid, username: user.username };
     const accessToken = await this.jwtService.sign(payload);
-
     await this.userRepository.update(user.uuid, { token: accessToken });
 
     return { accessToken };

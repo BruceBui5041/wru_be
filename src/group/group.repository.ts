@@ -4,6 +4,7 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './group.entity';
 import { User } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
+import { FetchMyGroupsDto } from './dto/fetch-my-groups.dto';
 
 @EntityRepository(Group)
 export class GroupRepository extends Repository<Group> {
@@ -23,6 +24,16 @@ export class GroupRepository extends Repository<Group> {
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }
+  }
+
+  async fetchMyGroups(user: User, fetchMyGroupsDto: FetchMyGroupsDto): Promise<Group[]> {
+    const groups = await this.find({ owner: user });
+
+    // const groups = await this.createQueryBuilder(Group.name)
+    //   .leftJoinAndSelect(`${Group.name}.ownerUuid`, 'owner')
+    //   .where(`${Group.name}.ownerUuid =:userUuid`, { userUuid: user.uuid })
+    //   .getMany();
+    return groups;
   }
 
   async addMember(newMemberUsernameOrEmail: string, groupUuid: string): Promise<Group> {

@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { UserProfile } from './user-profile.entity';
-import { UserProfileGraphQLType } from './user-profile.gql.type';
+import { UserProfile } from '../user-profile/user-profile.entity';
+import { UserProfileGraphQLType } from '../user-profile/user-profile.gql.type';
 
 @ObjectType('User')
 export class UserGraphQLType {

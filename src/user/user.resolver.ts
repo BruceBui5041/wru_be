@@ -1,9 +1,9 @@
 import { UseGuards } from '@nestjs/common';
 import { Resolver, Query, Args } from '@nestjs/graphql';
 import { AuthService } from '../auth/auth.service';
-import { GetUserGQL } from '../auth/decorators/get-user.gql.decorator';
+import { GqlGetUser } from '../auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from '../auth/guards/auth.guard.gql';
-import { UserProfileGraphQLType } from './user-profile.gql.type';
+import { UserProfileGraphQLType } from '../user-profile/user-profile.gql.type';
 import { User } from './user.entity';
 import { UserGraphQLType } from './user.gql.type';
 
@@ -13,7 +13,7 @@ export class UserResolver {
 
   @Query(returns => UserProfileGraphQLType)
   @UseGuards(GqlAuthGuard)
-  async getUserInfo(@GetUserGQL() user: User): Promise<User> {
+  async getUserInfo(@GqlGetUser() user: User): Promise<User> {
     return await this.authService.getUserProfile(user);
   }
 }

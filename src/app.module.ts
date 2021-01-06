@@ -8,6 +8,7 @@ import { JouneyModule } from './jouney/jouney.module';
 import { MarkerModule } from './marker/marker.module';
 import { InvitationModule } from './invitations/invitation.module';
 import { JoinInRequestModule } from './join-in-request/join-in-request.module';
+import { UserProfileModule } from './user-profile/user-profile.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { JoinInRequestModule } from './join-in-request/join-in-request.module';
     MarkerModule,
     InvitationModule,
     JoinInRequestModule,
+    UserProfileModule,
   ],
 })
 export class AppModule {}

@@ -14,7 +14,7 @@ export class InvitationGraphQLType {
   owner: User;
 
   @Field(() => UserGraphQLType)
-  invidedUser: User;
+  invitedUser: User;
 
   @Field(() => GroupGraphQLType)
   group: Group;
@@ -22,6 +22,6 @@ export class InvitationGraphQLType {
   @Field()
   status: InvitationStatus;
 
-  @Field()
-  createdAt: string;
+  @Field(type => Date)
+  createdAt: Date;
 }

@@ -13,6 +13,9 @@ export class GroupGraphQLType {
   @Field({ nullable: true })
   groupImageUrl: string;
 
+  @Field({ nullable: true })
+  description: string;
+
   @Field()
   owner: UserGraphQLType;
 
@@ -21,4 +24,7 @@ export class GroupGraphQLType {
 
   @Field(type => [JouneyGraphQLType], { defaultValue: [], nullable: true })
   jouneys: JouneyGraphQLType[];
+
+  @Field(type => Date)
+  createdAt: Date;
 }
