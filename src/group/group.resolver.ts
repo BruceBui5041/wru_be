@@ -1,5 +1,6 @@
 import { UseGuards, ValidationPipe } from '@nestjs/common';
 import { Query, Args, Mutation, Resolver } from '@nestjs/graphql';
+import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
 import { AuthService } from '../auth/auth.service';
 import { GqlGetUser } from '../auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from '../auth/guards/auth.guard.gql';
@@ -15,7 +16,7 @@ export class GroupResolver {
   constructor(private readonly groupService: GroupService, private readonly authService: AuthService) {}
 
   @Query(returns => [GroupGraphQLType])
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   fetchMyGroups(
     @GqlGetUser() user: User,
     @Args({ name: 'fetchingOptions', type: () => FetchMyGroupsDto }, ValidationPipe)
@@ -25,7 +26,7 @@ export class GroupResolver {
   }
 
   @Mutation(returns => GroupGraphQLType)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   createGroup(
     @GqlGetUser() user: User,
     @Args({ name: 'createGroupInput', type: () => CreateGroupDto }, ValidationPipe)

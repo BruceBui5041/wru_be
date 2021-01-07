@@ -8,19 +8,20 @@ import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { Invitation } from './invitation.entity';
 import { InvitationGraphQLType } from './invitation.gql.type';
 import { InvitationService } from './invitation.service';
+import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
 
 @Resolver(() => InvitationGraphQLType)
 export class InvitationResolver {
   constructor(private readonly invitationService: InvitationService) {}
 
   @Query(returns => [InvitationGraphQLType])
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   fetchMyInvitations(@GqlGetUser() user: User): Promise<Invitation[]> {
     return this.invitationService.fetchMyInvitations(user);
   }
 
   @Mutation(returns => InvitationGraphQLType)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   acceptInvitation(
     @GqlGetUser() user: User,
     @Args({ name: 'acceptInput', type: () => AcceptInvitationDto }) acceptInvitationDto: AcceptInvitationDto,
@@ -29,7 +30,7 @@ export class InvitationResolver {
   }
 
   @Mutation(returns => InvitationGraphQLType)
-  @UseGuards(GqlAuthGuard)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   createInvitation(
     @GqlGetUser() user: User,
     @Args('createInvitationInput', ValidationPipe) createInvitationDto: CreateInvitationDto,
