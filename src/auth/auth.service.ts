@@ -26,20 +26,24 @@ export class AuthService {
   }
 
   async signIn(authCrendentialsDto: SignInCredentialDto): Promise<{ accessToken: string }> {
-    const user = await this.userRepository.validatePassword(authCrendentialsDto);
-    if (!user?.username) throw new UnauthorizedException(['Invalid username or password']);
+    try {
+      const user = await this.userRepository.validatePassword(authCrendentialsDto);
+      if (!user?.username) throw new UnauthorizedException(['Invalid username or password']);
 
-    const payload: JwtPayload = { uuid: user.uuid, username: user.username };
-    const accessToken = await this.jwtService.sign(payload);
-    await this.userRepository.update(user.uuid, { token: accessToken });
-
-    return { accessToken };
+      const payload: JwtPayload = { uuid: user.uuid, username: user.username };
+      const accessToken = await this.jwtService.sign(payload);
+      await this.userRepository.update({ uuid: user.uuid }, { token: accessToken });
+      return { accessToken };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   async isMatchStoragedToken(sentToken: string): Promise<boolean> {
     const { uuid } = this.jwtService.verify(sentToken) as JwtPayload;
     if (uuid) {
-      const user = await this.userRepository.findOne({ uuid });
+      const user = await this.userRepository.findOne({ uuid: uuid });
       return user.token == sentToken;
     }
     return false;

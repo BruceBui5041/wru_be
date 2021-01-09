@@ -20,7 +20,7 @@ export class GroupRepository extends Repository<Group> {
     group.description = description;
 
     try {
-      return await group.save();
+      return group.save();
     } catch (error) {
       throw new InternalServerErrorException(error.message);
     }

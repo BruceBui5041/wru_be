@@ -134,13 +134,24 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-
   private _members: User[];
 
-  @ManyToMany(() => User)
-  @JoinTable({ name: 'group_users_user' })
+  @ManyToMany(
+    () => User,
+    user => user.groups,
+    { eager: true, cascade: true },
+  )
+  @JoinTable({
+    name: 'group_user',
+    joinColumn: { referencedColumnName: 'uuid', name: 'groupUuid' },
+    inverseJoinColumn: { referencedColumnName: 'uuid', name: 'userUuid' },
+  })
   public get members(): User[] {
     return this._members;
+  }
+
+  public set members(value: User[]) {
+    this._members = value;
   }
 
   /**
@@ -171,6 +182,7 @@ export class Group extends BaseEntity {
   public get invitatons(): Invitation[] {
     return this._invitatons;
   }
+
   public set invitatons(value: Invitation[]) {
     this._invitatons = value;
   }

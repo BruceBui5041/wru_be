@@ -5,6 +5,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Generated,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -146,7 +148,7 @@ export class User extends BaseEntity {
   @OneToMany(
     () => Group,
     group => group.owner,
-    { onDelete: 'CASCADE' },
+    { onDelete: 'CASCADE', onUpdate: 'CASCADE' },
   )
   public get groups(): Group[] {
     return this._groups;

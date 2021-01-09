@@ -17,7 +17,7 @@ export class UserRepository extends Repository<User> {
     user.salt = salt;
 
     try {
-      return await user.save();
+      return user.save();
     } catch (error) {
       if (error.code === 'ER_DUP_ENTRY') {
         // duplicate user
