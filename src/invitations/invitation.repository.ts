@@ -24,9 +24,4 @@ export class InvitationRepository extends Repository<Invitation> {
       throw err;
     }
   }
-
-  fetchMyInvitations(user: User): Promise<Invitation[]> {
-    const invitations = this.find({ owner: user });
-    return invitations;
-  }
 }

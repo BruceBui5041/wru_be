@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Entity('user_profile')
 export class UserProfile extends BaseEntity {
@@ -21,9 +22,13 @@ export class UserProfile extends BaseEntity {
     return this._uuid;
   }
 
+  public set uuid(value: string) {
+    this._uuid = value;
+  }
+
   private _phoneNumber: string;
 
-  @Column({ name: 'phoneNumber' })
+  @Column({ name: 'phoneNumber', nullable: true })
   public get phoneNumber(): string {
     return this._phoneNumber;
   }
@@ -33,7 +38,7 @@ export class UserProfile extends BaseEntity {
 
   private _avatarUrl: string;
 
-  @Column({ name: 'avatarUrl' })
+  @Column({ name: 'avatarUrl', nullable: true })
   @IsUrl()
   public get avatarUrl(): string {
     return this._avatarUrl;
@@ -44,7 +49,7 @@ export class UserProfile extends BaseEntity {
 
   private _status: string;
 
-  @Column({ name: 'status' })
+  @Column({ name: 'status', nullable: true })
   public get status(): string {
     return this._status;
   }
@@ -54,7 +59,7 @@ export class UserProfile extends BaseEntity {
 
   private _placesWantToGoTo: string;
 
-  @Column({ name: 'places' })
+  @Column({ name: 'places', nullable: true })
   public get placesWantToGoTo(): string {
     return this._placesWantToGoTo;
   }
@@ -103,5 +108,14 @@ export class UserProfile extends BaseEntity {
   }
   public set owner(value: User) {
     this._owner = value;
+  }
+
+  createNewUserProfile(owner: User, updateProfileDto: UpdateProfileDto) {
+    const { avatarUrl, phoneNumber, placesWantToGoTo, status } = updateProfileDto;
+    this.owner = owner;
+    this.avatarUrl = avatarUrl;
+    this.phoneNumber = phoneNumber;
+    this.placesWantToGoTo = placesWantToGoTo;
+    this.status = status;
   }
 }

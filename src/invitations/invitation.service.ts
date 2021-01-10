@@ -1,5 +1,8 @@
 import {
   ConflictException,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -14,6 +17,7 @@ import { InvitationRepository } from './invitation.repository';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { Group } from 'src/group/group.entity';
 import { Connection } from 'typeorm';
+import { FetchInvitationDto } from './dto/fetch-my-invitations.dto';
 
 @Injectable()
 export class InvitationService {
@@ -41,8 +45,15 @@ export class InvitationService {
       if ((group.members || []).find(member => member.uuid === invitedUser.uuid))
         throw new ConflictException(`${invitedUser.username} already is a member of this group`);
 
-      const alreadyInvitedUser = this.invitationRepository.findOne({ invitedUser });
-      if (alreadyInvitedUser) throw new ConflictException(`Already invited ${invitedUser.username}`);
+      const alreadyInvitedUser = await this.invitationRepository.findOne({ invitedUser });
+
+      if (
+        alreadyInvitedUser &&
+        [InvitationStatus.DENIED, InvitationStatus.IGNORED, InvitationStatus.PENDING].includes(
+          alreadyInvitedUser.status,
+        )
+      )
+        throw new ConflictException(`Already invited ${invitedUser.username}`);
 
       return this.invitationRepository.createInvitation(owner, invitedUser, group);
     } catch (err) {
@@ -50,21 +61,54 @@ export class InvitationService {
     }
   }
 
-  async acceptInvitation(user: User, acceptInvitationDto: AcceptInvitationDto): Promise<Invitation> {
+  async responseInvitation(user: User, acceptInvitationDto: AcceptInvitationDto): Promise<Invitation> {
+    const { invitationUuid, status } = acceptInvitationDto;
+
+    const invitation = await this.invitationRepository.findOne({ uuid: invitationUuid });
+    if (!invitation) throw new NotFoundException('Invitation was not found');
+
+    const group = await this.groupRepository.findOne(invitation.group.uuid);
+    if (!group) throw new NotFoundException('Group was not found');
+
+    if (status == InvitationStatus.DESTROYED) {
+      return this.destroyInvitation(user, invitation);
+    }
+
+    if (invitation.status == InvitationStatus.DESTROYED)
+      throw new NotFoundException('Invitation had been disabled');
+
+    switch (status) {
+      case InvitationStatus.ACCEPTED:
+        return this.acceptInvitation(user, invitation, group);
+      case InvitationStatus.DENIED:
+        return this.deniOrIgnoreInvivation(user, invitation, InvitationStatus.DENIED);
+      case InvitationStatus.IGNORED:
+        return this.deniOrIgnoreInvivation(user, invitation, InvitationStatus.IGNORED);
+    }
+  }
+
+  private async destroyInvitation(user: User, invitation: Invitation) {
     try {
-      const { invitationUuid } = acceptInvitationDto;
-      const invitation = await this.invitationRepository.findOne({ uuid: invitationUuid });
+      if (invitation.status == InvitationStatus.ACCEPTED)
+        throw new NotFoundException('Inviter is already accept this invitation');
 
-      if (!invitation) throw new NotFoundException('Invitation was not found');
+      if (invitation.owner.uuid != user.uuid)
+        throw new NotFoundException('Only owner can destroy an invitation');
 
+      await this.invitationRepository.updateInvitationStatus(invitation, InvitationStatus.DESTROYED);
+      return this.invitationRepository.findOne({ uuid: invitation.uuid });
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async acceptInvitation(user: User, invitation: Invitation, group: Group): Promise<Invitation> {
+    try {
       if (invitation.status != InvitationStatus.IGNORED && invitation.status != InvitationStatus.PENDING)
         throw new NotFoundException('This invitation is not pending anymore');
 
       if (invitation.invitedUser.uuid != user.uuid)
         throw new NotFoundException('Only invited user can accept an invitation');
-
-      const group = await this.groupRepository.findOne(invitation.group.uuid);
-      if (!group) throw new NotFoundException('Group was not found');
 
       await this.acceptInvitationTransaction(invitation, group, InvitationStatus.ACCEPTED);
       return this.invitationRepository.findOne({ uuid: invitation.uuid });
@@ -73,7 +117,30 @@ export class InvitationService {
     }
   }
 
-  async acceptInvitationTransaction(
+  private async deniOrIgnoreInvivation(
+    user: User,
+    invitation: Invitation,
+    status: InvitationStatus,
+  ): Promise<Invitation> {
+    try {
+      if (invitation.status != InvitationStatus.PENDING)
+        throw new NotFoundException('This invitation is not pending anymore');
+
+      if (invitation.invitedUser.uuid != user.uuid)
+        throw new NotFoundException(
+          status == InvitationStatus.DENIED
+            ? 'Only invited user can deni an invitation'
+            : 'Only invited user can ignore an invitation',
+        );
+
+      await this.invitationRepository.updateInvitationStatus(invitation, status);
+      return this.invitationRepository.findOne({ uuid: invitation.uuid });
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  private async acceptInvitationTransaction(
     invitation: Invitation,
     group: Group,
     invitationStatus: InvitationStatus,
@@ -113,7 +180,10 @@ export class InvitationService {
     }
   }
 
-  fetchMyInvitations(user: User): Promise<Invitation[]> {
-    return this.invitationRepository.fetchMyInvitations(user);
+  fetchMyInvitations(user: User, fetchInvitationDto: FetchInvitationDto): Promise<Invitation[]> {
+    if (fetchInvitationDto.own) {
+      return this.invitationRepository.find({ owner: user });
+    }
+    return this.invitationRepository.find({ invitedUser: user });
   }
 }

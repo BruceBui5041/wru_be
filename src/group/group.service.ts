@@ -18,7 +18,18 @@ export class GroupService {
     return newGroup;
   }
 
-  fetchMyGroups(user: User, fetchMyGroupsDto: FetchMyGroupsDto): Promise<Group[]> {
-    return this.groupRepository.fetchMyGroups(user, fetchMyGroupsDto);
+  async fetchMyGroups(user: User, fetchMyGroupsDto: FetchMyGroupsDto): Promise<Group[]> {
+    if (fetchMyGroupsDto.own) {
+      return await this.groupRepository.find({ owner: user });
+    }
+
+    const groups = await this.groupRepository
+      .createQueryBuilder(Group.name)
+      .leftJoinAndSelect(`${Group.name}.members`, 'member')
+      .leftJoinAndSelect(`${Group.name}.owner`, 'owner')
+      .where(`member.uuid =:userUuid`, { userUuid: user.uuid })
+      .getMany();
+
+    return groups;
   }
 }

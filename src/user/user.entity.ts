@@ -5,15 +5,16 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
-  ManyToMany,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Group } from '../group/group.entity';
 import { JoinInRequest } from '../join-in-request/join-in-request.entity';
 import { Invitation } from '../invitations/invitation.entity';
+import { UserProfile } from 'src/user-profile/user-profile.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -190,6 +191,22 @@ export class User extends BaseEntity {
 
   public set joinInRequests(value: JoinInRequest[]) {
     this._joinInRequest = value;
+  }
+
+  private _profile: UserProfile;
+
+  @OneToOne(
+    () => UserProfile,
+    user => user.owner,
+    { eager: true },
+  )
+  @JoinColumn()
+  public get profile(): UserProfile {
+    return this._profile;
+  }
+
+  public set profile(value: UserProfile) {
+    this._profile = value;
   }
 
   async validatePassword(password: string): Promise<boolean> {

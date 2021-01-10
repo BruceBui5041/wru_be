@@ -48,8 +48,4 @@ export class AuthService {
     }
     return false;
   }
-
-  async getUserProfile(user: User): Promise<User> {
-    return user;
-  }
 }

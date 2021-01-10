@@ -26,16 +26,6 @@ export class GroupRepository extends Repository<Group> {
     }
   }
 
-  async fetchMyGroups(user: User, fetchMyGroupsDto: FetchMyGroupsDto): Promise<Group[]> {
-    const groups = await this.find({ owner: user });
-
-    // const groups = await this.createQueryBuilder(Group.name)
-    //   .leftJoinAndSelect(`${Group.name}.ownerUuid`, 'owner')
-    //   .where(`${Group.name}.ownerUuid =:userUuid`, { userUuid: user.uuid })
-    //   .getMany();
-    return groups;
-  }
-
   async addMember(newMemberUsernameOrEmail: string, groupUuid: string): Promise<Group> {
     try {
       const newMember = await this.userRepository

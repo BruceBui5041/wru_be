@@ -7,6 +7,9 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { UserRepository } from '../user/user.repository';
 import { UserResolver } from '../user/user.resolver';
+import { UserProfileRepository } from '../user-profile/user-profile.repository';
+import { UserService } from '../user/user.service';
+import { UserProfileService } from '../user-profile/user-profile.service';
 
 @Module({
   imports: [
@@ -18,10 +21,10 @@ import { UserResolver } from '../user/user.resolver';
       },
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    TypeOrmModule.forFeature([UserRepository]),
+    TypeOrmModule.forFeature([UserRepository, UserProfileRepository]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, UserResolver],
-  exports: [JwtStrategy, PassportModule, AuthService],
+  providers: [AuthService, JwtStrategy, UserResolver, UserService, UserProfileService],
+  exports: [JwtStrategy, PassportModule, AuthService, UserService],
 })
 export class AuthModule {}

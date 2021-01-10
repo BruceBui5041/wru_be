@@ -9,6 +9,7 @@ import { Invitation } from './invitation.entity';
 import { InvitationGraphQLType } from './invitation.gql.type';
 import { InvitationService } from './invitation.service';
 import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
+import { FetchInvitationDto } from './dto/fetch-my-invitations.dto';
 
 @Resolver(() => InvitationGraphQLType)
 export class InvitationResolver {
@@ -16,8 +17,12 @@ export class InvitationResolver {
 
   @Query(returns => [InvitationGraphQLType])
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
-  fetchMyInvitations(@GqlGetUser() user: User): Promise<Invitation[]> {
-    return this.invitationService.fetchMyInvitations(user);
+  fetchMyInvitations(
+    @GqlGetUser() user: User,
+    @Args({ name: 'fetchOptions', type: () => FetchInvitationDto })
+    fetchInvitationDto: FetchInvitationDto,
+  ): Promise<Invitation[]> {
+    return this.invitationService.fetchMyInvitations(user, fetchInvitationDto);
   }
 
   @Mutation(returns => InvitationGraphQLType)
@@ -26,7 +31,7 @@ export class InvitationResolver {
     @GqlGetUser() user: User,
     @Args({ name: 'acceptInput', type: () => AcceptInvitationDto }) acceptInvitationDto: AcceptInvitationDto,
   ): Promise<Invitation> {
-    return this.invitationService.acceptInvitation(user, acceptInvitationDto);
+    return this.invitationService.responseInvitation(user, acceptInvitationDto);
   }
 
   @Mutation(returns => InvitationGraphQLType)

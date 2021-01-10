@@ -2,15 +2,15 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType('UserProfile')
 export class UserProfileGraphQLType {
-  @Field()
+  @Field({ defaultValue: '', nullable: true })
   phoneNumber: string;
 
-  @Field()
+  @Field({ defaultValue: '', nullable: true })
   avatarUrl: string;
 
-  @Field()
+  @Field({ defaultValue: '', nullable: true })
   status: string;
 
-  @Field()
+  @Field({ defaultValue: '', nullable: true })
   placesWantToGoTo: string;
 }

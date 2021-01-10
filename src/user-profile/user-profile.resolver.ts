@@ -1,4 +1,5 @@
 import { Resolver } from '@nestjs/graphql';
+import { UserGraphQLType } from 'src/user/user.gql.type';
 
-@Resolver()
+@Resolver(type => UserGraphQLType)
 export class UserProfileResolver {}

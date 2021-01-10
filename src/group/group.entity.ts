@@ -19,6 +19,15 @@ import { Invitation } from '../invitations/invitation.entity';
 
 @Entity('groups')
 export class Group extends BaseEntity {
+  static columnNames = {
+    uuid: 'uuid',
+    groupName: 'groupName',
+    description: 'description',
+    groupImageUrl: 'groupImageUrl',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+  };
+
   constructor(creater: User) {
     super();
     this.owner = creater;
@@ -29,7 +38,7 @@ export class Group extends BaseEntity {
    */
   private _uuid: string;
 
-  @PrimaryGeneratedColumn('uuid', { name: 'uuid' })
+  @PrimaryGeneratedColumn('uuid', { name: Group.columnNames.uuid })
   @IsUUID()
   public get uuid(): string {
     return this._uuid;
@@ -42,7 +51,7 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-  @Column({ name: 'groupName' })
+  @Column({ name: Group.columnNames.groupName })
   private _groupName: string;
 
   public get groupName(): string {
@@ -86,7 +95,7 @@ export class Group extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', name: 'createdAt' })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -104,6 +113,7 @@ export class Group extends BaseEntity {
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP(6)',
     onUpdate: 'CURRENT_TIMESTAMP(6)',
+    name: 'updatedAt',
   })
   public get updatedAt(): Date {
     return this._updatedAt;
