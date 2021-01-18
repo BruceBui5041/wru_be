@@ -2,6 +2,7 @@ import { IsUUID } from 'class-validator';
 import { User } from '../user/user.entity';
 import { Jouney } from '../jouney/jouney.entity';
 import {
+  AfterInsert,
   BaseEntity,
   Column,
   CreateDateColumn,
@@ -16,6 +17,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Invitation } from '../invitations/invitation.entity';
+import { PubSub } from 'graphql-subscriptions';
+import { Inject } from '@nestjs/common';
 
 @Entity('groups')
 export class Group extends BaseEntity {
@@ -149,7 +152,7 @@ export class Group extends BaseEntity {
   @ManyToMany(
     () => User,
     user => user.groups,
-    { eager: true, cascade: true },
+    { cascade: true },
   )
   @JoinTable({
     name: 'group_user',
@@ -196,4 +199,9 @@ export class Group extends BaseEntity {
   public set invitatons(value: Invitation[]) {
     this._invitatons = value;
   }
+
+  // @AfterInsert()
+  // triggerOnChangeGroup() {
+  //   this.pubSub.publish('onChangeGroup', this);
+  // }
 }

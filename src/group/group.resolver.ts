@@ -1,6 +1,9 @@
-import { UseGuards, ValidationPipe } from '@nestjs/common';
-import { Query, Args, Mutation, Resolver } from '@nestjs/graphql';
-import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
+import { Inject, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Query, Args, Mutation, Resolver, ResolveField, Parent, Subscription } from '@nestjs/graphql';
+import { PubSub } from 'graphql-subscriptions';
+import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
+import { SubscriptionNames } from '../constants';
+import { UserGraphQLType } from '../user/user.gql.type';
 import { AuthService } from '../auth/auth.service';
 import { GqlGetUser } from '../auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from '../auth/guards/auth.guard.gql';
@@ -25,6 +28,11 @@ export class GroupResolver {
     return this.groupService.fetchMyGroups(user, fetchMyGroupsDto);
   }
 
+  @ResolveField(returns => [UserGraphQLType], { name: 'members' })
+  async members(@Parent() group: Group): Promise<User[]> {
+    return this.groupService.fetchGroupMembers(group);
+  }
+
   @Mutation(returns => GroupGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   createGroup(
@@ -33,5 +41,23 @@ export class GroupResolver {
     createGroupDto: CreateGroupDto,
   ): Promise<Group> {
     return this.groupService.createGroup(user, createGroupDto);
+  }
+
+  @Subscription(returns => GroupGraphQLType, {
+    name: SubscriptionNames.onChangeGroup,
+    /** To filter out specific events */
+    async filter(this: GroupResolver, payloadGroup: Group, variables) {
+      /** variables is the args that inputed into the Subscription */
+      return payloadGroup.uuid === variables.uuid;
+    },
+    /** Mutating subscription payloads */
+    resolve(this: GroupResolver, value) {
+      /** "this" refers to an instance of "GroupResolver" */
+      return value.onChangeGroup;
+    },
+  })
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  onChangeGroups(@GqlGetUser() user: User): Promise<Group> {
+    return;
   }
 }

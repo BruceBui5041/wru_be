@@ -3,7 +3,7 @@ import { IsUrl } from 'class-validator';
 
 @InputType()
 export class UpdateProfileDto {
-  @Field({ nullable: true })
+  @Field({ nullable: true, defaultValue: null })
   phoneNumber: string;
 
   @Field({ nullable: true, defaultValue: null })

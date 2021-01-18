@@ -4,7 +4,7 @@ import { GroupResolver } from './group.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module';
 import { GroupRepository } from './group.repository';
-import { UserRepository } from 'src/user/user.repository';
+import { UserRepository } from '../user/user.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([GroupRepository, UserRepository]), AuthModule],

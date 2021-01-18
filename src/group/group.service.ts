@@ -25,11 +25,19 @@ export class GroupService {
 
     const groups = await this.groupRepository
       .createQueryBuilder(Group.name)
-      .leftJoinAndSelect(`${Group.name}.members`, 'member')
+      // .leftJoinAndSelect(`${Group.name}.members`, 'member')
       .leftJoinAndSelect(`${Group.name}.owner`, 'owner')
       .where(`member.uuid =:userUuid`, { userUuid: user.uuid })
       .getMany();
 
     return groups;
+  }
+
+  async fetchGroupMembers(group: Group): Promise<User[]> {
+    const groupWithMembers = await this.groupRepository.findOne(
+      { uuid: group.uuid },
+      { relations: ['members'] },
+    );
+    return groupWithMembers.members;
   }
 }

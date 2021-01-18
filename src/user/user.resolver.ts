@@ -1,8 +1,8 @@
 import { UseGuards, ValidationPipe } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
-import { UpdateProfileDto } from 'src/user-profile/dto/update-profile.dto';
-import { UserProfileService } from 'src/user-profile/user-profile.service';
+import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
+import { UpdateProfileDto } from '../user-profile/dto/update-profile.dto';
+import { UserProfileService } from '../user-profile/user-profile.service';
 import { AuthService } from '../auth/auth.service';
 import { GqlGetUser } from '../auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from '../auth/guards/auth.guard.gql';

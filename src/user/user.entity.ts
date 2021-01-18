@@ -14,7 +14,7 @@ import {
 import { Group } from '../group/group.entity';
 import { JoinInRequest } from '../join-in-request/join-in-request.entity';
 import { Invitation } from '../invitations/invitation.entity';
-import { UserProfile } from 'src/user-profile/user-profile.entity';
+import { UserProfile } from '../user-profile/user-profile.entity';
 
 @Entity('user')
 export class User extends BaseEntity {

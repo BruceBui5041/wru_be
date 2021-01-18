@@ -1,8 +1,6 @@
 import {
   ConflictException,
-  HttpCode,
-  HttpException,
-  HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -15,9 +13,11 @@ import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { Invitation, InvitationStatus } from './invitation.entity';
 import { InvitationRepository } from './invitation.repository';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
-import { Group } from 'src/group/group.entity';
+import { Group } from '../group/group.entity';
 import { Connection } from 'typeorm';
 import { FetchInvitationDto } from './dto/fetch-my-invitations.dto';
+import { PubSub } from 'graphql-subscriptions';
+import { PubSubProvider } from '../constants';
 
 @Injectable()
 export class InvitationService {
@@ -28,6 +28,8 @@ export class InvitationService {
     private readonly userRepository: UserRepository,
     @InjectRepository(GroupRepository)
     private readonly groupRepository: GroupRepository,
+    @Inject(PubSubProvider)
+    private pubSub: PubSub,
     private connection: Connection,
   ) {}
 
@@ -39,13 +41,13 @@ export class InvitationService {
       });
       if (!invitedUser) throw new NotFoundException('Invited user is not found');
 
-      const group = await this.groupRepository.findOne(groupUuid);
+      const group = await this.groupRepository.findOne({ uuid: groupUuid }, { relations: ['members'] });
       if (!group) throw new NotFoundException('This group is not found');
 
       if ((group.members || []).find(member => member.uuid === invitedUser.uuid))
         throw new ConflictException(`${invitedUser.username} already is a member of this group`);
 
-      const alreadyInvitedUser = await this.invitationRepository.findOne({ invitedUser });
+      const alreadyInvitedUser = await this.invitationRepository.findOne({ uuid: invitedUser.uuid });
 
       if (
         alreadyInvitedUser &&
@@ -54,8 +56,9 @@ export class InvitationService {
         )
       )
         throw new ConflictException(`Already invited ${invitedUser.username}`);
-
-      return this.invitationRepository.createInvitation(owner, invitedUser, group);
+      const result = await this.invitationRepository.createInvitation(owner, invitedUser, group);
+      // this.pubSub.publish('onChangeInvitations', { invitation: result });
+      return result;
     } catch (err) {
       throw err;
     }

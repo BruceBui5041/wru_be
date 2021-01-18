@@ -4,7 +4,6 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { Group } from './group.entity';
 import { User } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
-import { FetchMyGroupsDto } from './dto/fetch-my-groups.dto';
 
 @EntityRepository(Group)
 export class GroupRepository extends Repository<Group> {
@@ -22,29 +21,8 @@ export class GroupRepository extends Repository<Group> {
     try {
       return group.save();
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException(error.message);
-    }
-  }
-
-  async addMember(newMemberUsernameOrEmail: string, groupUuid: string): Promise<Group> {
-    try {
-      const newMember = await this.userRepository
-        .createQueryBuilder(User.name)
-        .where('user.username = :username OR user.email = :email', {
-          username: newMemberUsernameOrEmail,
-          email: newMemberUsernameOrEmail,
-        })
-        .getOne();
-      if (!newMember) throw new NotFoundException('Invited user is not found');
-
-      const group = await this.findOne(groupUuid);
-      if (!group) throw new NotFoundException('This group is not found');
-
-      const res = await this.update(group, { members: [...group.members, newMember] });
-      if (res.affected > 0) return await this.findOne(groupUuid);
-      throw new InternalServerErrorException('Can not add new member');
-    } catch (err) {
-      throw err;
     }
   }
 }
