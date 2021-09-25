@@ -167,7 +167,7 @@ export class InvitationService {
         //   .update({ uuid: group.uuid }, { members: group.members });
 
         await queryRunner.manager.query(
-          `INSERT \`group_user\` set \`groupUuid\` = '${group.uuid}' , \`userUuid\` = '${invitation.invitedUser.uuid}'`,
+          `INSERT \`${Group.joinUserTable.tableName}\` set \`${Group.joinUserTable.groupUuid}\` = '${group.uuid}' , \`${Group.joinUserTable.userUuid}\` = '${invitation.invitedUser.uuid}'`,
         );
 
         await queryRunner.commitTransaction();

@@ -149,7 +149,7 @@ export class User extends BaseEntity {
   @OneToMany(
     () => Group,
     group => group.owner,
-    { onDelete: 'CASCADE', onUpdate: 'CASCADE' },
+    { onDelete: 'CASCADE' },
   )
   public get groups(): Group[] {
     return this._groups;

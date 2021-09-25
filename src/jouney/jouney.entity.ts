@@ -1,32 +1,51 @@
-import { IsIn, IsUUID } from 'class-validator';
+import { IsIn, IsUUID, MaxLength } from 'class-validator';
 import { User } from '../user/user.entity';
-import { Group } from '../group/group.entity';
 import { Marker } from '../marker/marker.entity';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
-  Generated,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { InputJouneyDto } from './dto/input-jouney.dto';
+import { JouneyVisibility } from './jouney.enum';
 
 @Entity('jouneys')
 export class Jouney extends BaseEntity {
+  constructor(owner: User, jouneyInfo?: InputJouneyDto) {
+    super();
+    this.owner = owner;
+    if (jouneyInfo) {
+      const { name, description, visibility, image } = jouneyInfo;
+      this.name = name;
+      this.description = description;
+      this.visibility = visibility;
+      this.image = image;
+    }
+  }
+
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   uuid: string;
 
-  @Column()
-  title: string;
+  @Column({ length: 100 })
+  @MaxLength(100)
+  name: string;
 
-  @Column()
-  @IsIn(['public', 'private'])
-  visibility: string;
+  @Column({ nullable: true, length: 512 })
+  @MaxLength(512)
+  description: string;
+
+  @Column({ nullable: true, length: 512 })
+  image: string;
+
+  @Column('enum', { enum: JouneyVisibility, default: JouneyVisibility.PRIVATE })
+  visibility: JouneyVisibility;
 
   /**
    * -----------------------------------------------------
@@ -63,6 +82,7 @@ export class Jouney extends BaseEntity {
   @ManyToOne(
     () => User,
     user => user,
+    { eager: true },
   )
   @JoinColumn({ name: 'ownerUuid' })
   owner: User;
@@ -70,6 +90,7 @@ export class Jouney extends BaseEntity {
   @OneToMany(
     () => Marker,
     marker => marker.jouney,
+    { eager: true },
   )
   markers: Marker[];
 }

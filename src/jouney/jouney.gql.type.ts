@@ -5,17 +5,20 @@ import { GroupGraphQLType } from '../group/group.gql.type';
 @ObjectType('Jouney')
 export class JouneyGraphQLType {
   @Field()
-  id: number;
+  uuid: string;
 
   @Field()
-  title: string;
+  name: string;
 
-  @Field({ defaultValue: 'public' })
+  @Field({ nullable: true })
+  description?: string;
+
+  @Field({ nullable: true })
+  image?: string;
+
+  @Field()
   visibility: string;
 
   @Field()
-  owner: UserGraphQLType;
-
-  @Field(type => GroupGraphQLType)
-  group: GroupGraphQLType;
+  owner?: UserGraphQLType;
 }

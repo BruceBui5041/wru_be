@@ -22,6 +22,12 @@ import { Inject } from '@nestjs/common';
 
 @Entity('groups')
 export class Group extends BaseEntity {
+  static joinUserTable = {
+    tableName: 'group_user',
+    userUuid: 'userUuid',
+    groupUuid: 'groupUuid',
+  };
+
   static columnNames = {
     uuid: 'uuid',
     groupName: 'groupName',
@@ -82,7 +88,7 @@ export class Group extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
-  @Column({ nullable: true, name: 'groupImageUrl' })
+  @Column({ nullable: true, name: 'groupImageUrl', length: 512 })
   private _groupImageUrl: string;
 
   public get groupImageUrl(): string {
@@ -149,15 +155,11 @@ export class Group extends BaseEntity {
    */
   private _members: User[];
 
-  @ManyToMany(
-    () => User,
-    user => user.groups,
-    { cascade: true },
-  )
+  @ManyToMany(() => User, { cascade: true })
   @JoinTable({
-    name: 'group_user',
-    joinColumn: { referencedColumnName: 'uuid', name: 'groupUuid' },
-    inverseJoinColumn: { referencedColumnName: 'uuid', name: 'userUuid' },
+    name: Group.joinUserTable.tableName,
+    joinColumn: { referencedColumnName: 'uuid', name: Group.joinUserTable.groupUuid },
+    inverseJoinColumn: { referencedColumnName: 'uuid', name: Group.joinUserTable.userUuid },
   })
   public get members(): User[] {
     return this._members;

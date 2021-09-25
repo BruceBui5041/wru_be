@@ -19,9 +19,14 @@ export class GroupRepository extends Repository<Group> {
     group.description = description;
 
     try {
-      return group.save();
+      await group.save();
+
+      // Update many to many manually
+      await this.query(
+        `INSERT \`${Group.joinUserTable.tableName}\` set \`${Group.joinUserTable.groupUuid}\` = '${group.uuid}' , \`${Group.joinUserTable.userUuid}\` = '${creater.uuid}'`,
+      );
+      return group;
     } catch (error) {
-      console.log(error);
       throw new InternalServerErrorException(error.message);
     }
   }

@@ -1,5 +1,5 @@
 import { Module, UnauthorizedException } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { typeOrmConfig } from './config/typeorm.config';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -17,6 +17,28 @@ import { AuthService } from './auth/auth.service';
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeOrmConfig),
+    // ConfigModule.forRoot({ envFilePath: [`.env.${process.env.STAGE}`] }),
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: async (configService: ConfigService): Promise<TypeOrmModuleOptions> => {
+    //     return {
+    //       type: 'mysql',
+    //       synchronize: true,
+    //       entities: [__dirname + '/../**/*.entity.{js,ts}'],
+    //       migrations: ['migration/*.js'],
+    //       cli: {
+    //         migrationsDir: 'migration',
+    //       },
+    //       host: configService.get('DB_HOST'),
+    //       port: parseInt(configService.get<string>('DB_PORT')),
+    //       username: configService.get('DB_USERNAME'),
+    //       password: configService.get('DB_PASSWORD'),
+    //       database: configService.get('DB_NAME'),
+    //       // entities: [__dirname + '/../**/*.entity.{js,ts}'],
+    //     };
+    //   },
+    // }),
     GraphQLModule.forRoot({
       // autoSchemaFile: 'schema.gql',
       autoSchemaFile: true,

@@ -4,4 +4,7 @@ import { Field, InputType } from '@nestjs/graphql';
 export class FetchMyGroupsDto {
   @Field({ nullable: true, defaultValue: true })
   own: boolean = true;
+
+  @Field(() => [String]!, { nullable: true, defaultValue: null })
+  ids: string[] = null;
 }

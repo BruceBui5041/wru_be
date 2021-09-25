@@ -2,6 +2,9 @@ import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType('UserProfile')
 export class UserProfileGraphQLType {
+  @Field()
+  uuid: string;
+
   @Field({ defaultValue: '', nullable: true })
   phoneNumber: string;
 
