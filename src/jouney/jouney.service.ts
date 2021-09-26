@@ -2,15 +2,15 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { Jouney } from './jouney.entity';
-import { JouneyRepositiory } from './jouney.repository';
+import { JouneyRepository } from './jouney.repository';
 import { InputJouneyDto } from './dto/input-jouney.dto';
 import { UpdateJouneyDto } from './dto/update-jouney.dto';
 
 @Injectable()
 export class JouneyService {
   constructor(
-    @InjectRepository(JouneyRepositiory)
-    private readonly jouneyRepository: JouneyRepositiory,
+    @InjectRepository(JouneyRepository)
+    private readonly jouneyRepository: JouneyRepository,
   ) {}
 
   async create(owner: User, inputJouneyDto: InputJouneyDto): Promise<Jouney> {

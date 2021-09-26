@@ -90,7 +90,6 @@ export class Jouney extends BaseEntity {
   @OneToMany(
     () => Marker,
     marker => marker.jouney,
-    { eager: true },
   )
   markers: Marker[];
 }

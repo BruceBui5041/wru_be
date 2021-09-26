@@ -4,10 +4,10 @@ import { JouneyResolver } from './jouney.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from 'src/user/user.repository';
 import { AuthModule } from 'src/auth/auth.module';
-import { JouneyRepositiory } from './jouney.repository';
+import { JouneyRepository } from './jouney.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([JouneyRepositiory, UserRepository]), AuthModule],
+  imports: [TypeOrmModule.forFeature([JouneyRepository, UserRepository]), AuthModule],
   providers: [JouneyService, JouneyResolver],
 })
 export class JouneyModule {}

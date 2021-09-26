@@ -12,11 +12,11 @@ import { JouneyGraphQLType } from './jouney.gql.type';
 import { UpdateJouneyDto } from './dto/update-jouney.dto';
 @Resolver()
 export class JouneyResolver {
-  constructor(private readonly jouneyService: JouneyService, private readonly authService: AuthService) {}
+  constructor(private readonly jouneyService: JouneyService) {}
 
   @Query(returns => [JouneyGraphQLType])
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
-  fetchAllMyJouney(@GqlGetUser() user: User): Promise<Jouney[]> {
+  jouneys(@GqlGetUser() user: User): Promise<Jouney[]> {
     return this.jouneyService.fetchAllMyJouney(user);
   }
 
