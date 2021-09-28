@@ -21,4 +21,13 @@ export class JouneyGraphQLType {
 
   @Field()
   owner?: UserGraphQLType;
+
+  @Field(type => Date)
+  createdAt: Date;
+
+  @Field(type => Date)
+  updatedAt: Date;
+
+  @Field(type => Number)
+  markerCount: number;
 }

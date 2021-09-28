@@ -46,4 +46,10 @@ export class MarkerGraphQLType {
 
   @Field({ nullable: true })
   image5?: string;
+
+  @Field(type => Date)
+  createdAt: Date;
+
+  @Field(type => Date)
+  updatedAt: Date;
 }

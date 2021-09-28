@@ -50,4 +50,13 @@ export class JouneyService {
       throw new InternalServerErrorException(err.message);
     }
   }
+
+  async countMarker(jouney: Jouney): Promise<number> {
+    try {
+      const j = await this.jouneyRepository.findOne(jouney.uuid, { relations: ['markers'] });
+      return j.markers.length;
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+  }
 }
