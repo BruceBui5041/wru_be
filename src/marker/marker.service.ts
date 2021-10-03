@@ -69,7 +69,10 @@ export class MarkerService {
 
   async fetchAllMarkerByJouneyId(jouneyId: string): Promise<Marker[]> {
     try {
-      return await this.markerRepository.find({ where: { jouney: { uuid: jouneyId } } });
+      return await this.markerRepository.find({
+        where: { jouney: { uuid: jouneyId } },
+        order: { createdAt: 'DESC' },
+      });
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }

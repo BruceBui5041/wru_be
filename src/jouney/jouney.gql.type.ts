@@ -1,6 +1,8 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { UserGraphQLType } from '../user/user.gql.type';
 import { GroupGraphQLType } from '../group/group.gql.type';
+import { MarkerGraphQLType } from 'src/marker/marker.gql.type';
+import { Marker } from 'src/marker/marker.entity';
 
 @ObjectType('Jouney')
 export class JouneyGraphQLType {
@@ -30,4 +32,7 @@ export class JouneyGraphQLType {
 
   @Field(type => Number)
   markerCount: number;
+
+  @Field(type => [MarkerGraphQLType])
+  markers: Marker[];
 }

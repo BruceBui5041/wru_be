@@ -5,12 +5,16 @@ import { Jouney } from './jouney.entity';
 import { JouneyRepository } from './jouney.repository';
 import { InputJouneyDto } from './dto/input-jouney.dto';
 import { UpdateJouneyDto } from './dto/update-jouney.dto';
+import { MarkerRepository } from 'src/marker/marker.repository';
+import { Marker } from 'src/marker/marker.entity';
 
 @Injectable()
 export class JouneyService {
   constructor(
     @InjectRepository(JouneyRepository)
     private readonly jouneyRepository: JouneyRepository,
+    @InjectRepository(MarkerRepository)
+    private readonly markerRepository: MarkerRepository,
   ) {}
 
   async create(owner: User, inputJouneyDto: InputJouneyDto): Promise<Jouney> {
@@ -45,7 +49,10 @@ export class JouneyService {
 
   async fetchAllMyJouney(owner: User): Promise<Jouney[]> {
     try {
-      return await this.jouneyRepository.find({ owner });
+      return await this.jouneyRepository.find({
+        where: { owner: { uuid: owner.uuid } },
+        order: { createdAt: 'DESC' },
+      });
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }
@@ -53,8 +60,8 @@ export class JouneyService {
 
   async countMarker(jouney: Jouney): Promise<number> {
     try {
-      const j = await this.jouneyRepository.findOne(jouney.uuid, { relations: ['markers'] });
-      return j.markers.length;
+      const markerCount = await this.markerRepository.count({ jouney: { uuid: jouney.uuid } });
+      return markerCount;
     } catch (err) {
       throw new InternalServerErrorException(err.message);
     }

@@ -45,7 +45,7 @@ import { AuthService } from './auth/auth.service';
       installSubscriptionHandlers: true,
       /** To customize the subscriptions server (e.g., change the listener port) */
       subscriptions: {
-        keepAlive: 5000,
+        'graphql-ws': true,
         // get headers
         // onConnect: connectionParams => {
         //   // convert header keys to lowercase

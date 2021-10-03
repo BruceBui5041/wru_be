@@ -47,13 +47,13 @@ export class Marker extends BaseEntity {
   @MaxLength(512)
   description?: string;
 
-  @Column()
+  @Column({ type: 'double precision' })
   @IsNumber()
   @Max(180)
   @Min(-180)
   lng: number;
 
-  @Column()
+  @Column({ type: 'double precision' })
   @IsNumber()
   @Max(90)
   @Min(-90)
