@@ -1,5 +1,18 @@
-import { CacheKey, CacheTTL, UseGuards, ValidationPipe } from '@nestjs/common';
-import { Args, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import {
+  CacheKey,
+  CacheTTL,
+  NotFoundException,
+  UseGuards,
+  ValidationPipe,
+} from '@nestjs/common';
+import {
+  Args,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
 import { AuthService } from 'src/auth/auth.service';
 import { GqlGetUser } from 'src/auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from 'src/auth/guards/auth.guard.gql';
@@ -14,7 +27,7 @@ import { JouneyRepository } from './jouney.repository';
 import { MarkerGraphQLType } from 'src/marker/marker.gql.type';
 import { MarkerService } from 'src/marker/marker.service';
 import { Marker } from 'src/marker/marker.entity';
-@Resolver(returns => JouneyGraphQLType)
+@Resolver((returns) => JouneyGraphQLType)
 export class JouneyResolver {
   constructor(
     private readonly jouneyService: JouneyService,
@@ -22,29 +35,33 @@ export class JouneyResolver {
     private readonly markerService: MarkerService,
   ) {}
 
-  @Query(returns => JouneyGraphQLType)
+  @Query((returns) => JouneyGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
-  jouney(@Args({ name: 'id', type: () => String! }) id: String): Promise<Jouney> {
-    return this.jouneyRepository.findOne({ where: { uuid: id } });
+  async jouney(
+    @Args({ name: 'id', type: () => String! }) id: String,
+  ): Promise<Jouney> {
+    const jouney = await this.jouneyRepository.findOne({ where: { uuid: id } });
+    if (!jouney) throw new NotFoundException();
+    return jouney;
   }
 
-  @Query(returns => [JouneyGraphQLType])
+  @Query((returns) => [JouneyGraphQLType])
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   jouneys(@GqlGetUser() user: User): Promise<Jouney[]> {
     return this.jouneyService.fetchAllMyJouney(user);
   }
 
-  @ResolveField(returns => Number)
+  @ResolveField((returns) => Number)
   markerCount(@Parent() jouney: Jouney): Promise<number> {
     return this.jouneyService.countMarker(jouney);
   }
 
-  @ResolveField(returns => [MarkerGraphQLType])
+  @ResolveField((returns) => [MarkerGraphQLType])
   markers(@Parent() jouney: Jouney): Promise<Marker[]> {
     return this.markerService.fetchAllMarkerByJouneyId(jouney.uuid);
   }
 
-  @Mutation(returns => JouneyGraphQLType)
+  @Mutation((returns) => JouneyGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   createJouney(
     @GqlGetUser() user: User,
@@ -54,7 +71,7 @@ export class JouneyResolver {
     return this.jouneyService.create(user, createJouneyDto);
   }
 
-  @Mutation(returns => JouneyGraphQLType)
+  @Mutation((returns) => JouneyGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   updateJouney(
     @Args({ name: 'id', type: () => String! })

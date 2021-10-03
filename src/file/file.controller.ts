@@ -7,26 +7,34 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
-  Response,
+  Request,
   StreamableFile,
+  Req,
+  NotFoundException,
 } from '@nestjs/common';
 import { Args } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 import { diskStorage } from 'multer';
-import { parse, extname, join } from 'path';
+import { join } from 'path';
+import { deleteUnusedImage, editFileName, imageFileFilter } from '../utils';
 
 @Controller('file')
 export class FileController {
-  @Get()
+  @Get('*')
   @UseGuards(AuthGuard())
-  getFile(): StreamableFile {
-    const file = createReadStream(join(process.cwd(), 'package.json'));
+  getFile(@Req() req: Request): StreamableFile {
+    const fileName = req.url.split('/')[2];
+    if (!existsSync(join(process.cwd(), `/files/${fileName}`))) {
+      throw new NotFoundException();
+    }
+
+    const file = createReadStream(join(process.cwd(), `/files/${fileName}`));
     return new StreamableFile(file);
   }
 
-  @Post('upload')
+  @Post('multiple_upload')
   @UseGuards(AuthGuard())
   @UseInterceptors(
     FilesInterceptor('images', 5, {
@@ -37,9 +45,9 @@ export class FileController {
       fileFilter: imageFileFilter,
     }),
   )
-  uploadFile(@UploadedFiles() files) {
+  uploadFiles(@UploadedFiles() files) {
     const response = [];
-    files?.forEach(file => {
+    files?.forEach((file) => {
       const fileReponse = {
         filename: file.filename,
       };
@@ -47,21 +55,19 @@ export class FileController {
     });
     return response;
   }
-}
 
-export const imageFileFilter = (req, file, callback) => {
-  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-    return callback(new Error('Only image files are allowed!'), false);
+  @Post('upload')
+  @UseGuards(AuthGuard())
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
+  uploadFile(@UploadedFile() file) {
+    return { filename: file.filename };
   }
-  callback(null, true);
-};
-
-export const editFileName = (req, file, callback) => {
-  const name = file.originalname.split('.')[0];
-  const fileExtName = extname(file.originalname);
-  const randomName = Array(4)
-    .fill(null)
-    .map(() => Math.round(Math.random() * 16).toString(16))
-    .join('');
-  callback(null, `${name}-${randomName}${fileExtName}`);
-};
+}

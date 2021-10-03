@@ -11,11 +11,16 @@ import { JoinInRequestModule } from './join-in-request/join-in-request.module';
 import { UserProfileModule } from './user-profile/user-profile.module';
 import { FileModule } from './file/file.module';
 import { PubSubModule } from './pub-sub/pub-sub.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import { JwtPayload } from './auth/jwt-payload.interface';
 import { AuthService } from './auth/auth.service';
 
 @Module({
   imports: [
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'admin'),
+    // }),
     TypeOrmModule.forRoot(typeOrmConfig),
     // ConfigModule.forRoot({ envFilePath: [`.env.${process.env.STAGE}`] }),
     // TypeOrmModule.forRootAsync({
