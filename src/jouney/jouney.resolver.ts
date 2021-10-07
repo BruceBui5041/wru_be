@@ -41,7 +41,7 @@ export class JouneyResolver {
     @Args({ name: 'id', type: () => String! }) id: String,
   ): Promise<Jouney> {
     const jouney = await this.jouneyRepository.findOne({ where: { uuid: id } });
-    if (!jouney) throw new NotFoundException();
+    if (!jouney) throw new NotFoundException('Not found the record');
     return jouney;
   }
 

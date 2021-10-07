@@ -1,4 +1,13 @@
-import { IsIn, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { User } from '../user/user.entity';
 import { Jouney } from '../jouney/jouney.entity';
 import {
@@ -92,7 +101,10 @@ export class Marker extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -119,19 +131,15 @@ export class Marker extends BaseEntity {
     this._updatedAt = value;
   }
 
-  @ManyToOne(
-    () => User,
-    user => user,
-    { eager: true },
-  )
+  @ManyToOne(() => User, (user) => user, { eager: true })
   @JoinColumn({ name: 'ownerUuid' })
   owner: User;
 
-  @ManyToOne(
-    () => Jouney,
-    jouney => jouney.markers,
-    { eager: true },
-  )
+  @ManyToOne(() => Jouney, (jouney) => jouney.markers, {
+    eager: true,
+    cascade: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'jouneyUuid' })
   jouney: Jouney;
 }

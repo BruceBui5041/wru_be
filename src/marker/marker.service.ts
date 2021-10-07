@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JouneyRepository } from 'src/jouney/jouney.repository';
 import { User } from 'src/user/user.entity';
@@ -10,15 +14,21 @@ import { MarkerRepository } from './marker.repository';
 @Injectable()
 export class MarkerService {
   constructor(
-    @InjectRepository(MarkerRepository) private readonly markerRepository: MarkerRepository,
-    @InjectRepository(JouneyRepository) private readonly jouneyRepository: JouneyRepository,
+    @InjectRepository(MarkerRepository)
+    private readonly markerRepository: MarkerRepository,
+    @InjectRepository(JouneyRepository)
+    private readonly jouneyRepository: JouneyRepository,
   ) {}
 
-  async create(owner: User, jouneyId: string, marker: InputMarkerDto): Promise<Marker> {
+  async create(
+    owner: User,
+    jouneyId: string,
+    marker: InputMarkerDto,
+  ): Promise<Marker> {
     try {
       const jouney = await this.jouneyRepository.findOne(jouneyId);
       if (!jouney) {
-        throw new NotFoundException();
+        throw new NotFoundException('Not found the record');
       }
       const newMarker = new Marker(owner, jouney, marker);
       return await this.markerRepository.save(newMarker);
@@ -45,7 +55,7 @@ export class MarkerService {
       const marker = await this.markerRepository.findOne(markerId);
 
       if (!marker) {
-        throw new NotFoundException();
+        throw new NotFoundException('Not found the record');
       }
 
       marker.name = name;

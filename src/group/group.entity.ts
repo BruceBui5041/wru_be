@@ -104,7 +104,11 @@ export class Group extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)', name: 'createdAt' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+    name: 'createdAt',
+  })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -137,11 +141,7 @@ export class Group extends BaseEntity {
    */
   private _owner: User;
 
-  @ManyToOne(
-    () => User,
-    user => user.groups,
-    { eager: true },
-  )
+  @ManyToOne(() => User, (user) => user.groups, { eager: true })
   public get owner(): User {
     return this._owner;
   }
@@ -158,8 +158,14 @@ export class Group extends BaseEntity {
   @ManyToMany(() => User, { cascade: true })
   @JoinTable({
     name: Group.joinUserTable.tableName,
-    joinColumn: { referencedColumnName: 'uuid', name: Group.joinUserTable.groupUuid },
-    inverseJoinColumn: { referencedColumnName: 'uuid', name: Group.joinUserTable.userUuid },
+    joinColumn: {
+      referencedColumnName: 'uuid',
+      name: Group.joinUserTable.groupUuid,
+    },
+    inverseJoinColumn: {
+      referencedColumnName: 'uuid',
+      name: Group.joinUserTable.userUuid,
+    },
   })
   public get members(): User[] {
     return this._members;
@@ -189,11 +195,9 @@ export class Group extends BaseEntity {
    */
   private _invitatons: Invitation[];
 
-  @OneToMany(
-    () => Invitation,
-    invitation => invitation.group,
-    { onDelete: 'CASCADE' },
-  )
+  @OneToMany(() => Invitation, (invitation) => invitation.group, {
+    onDelete: 'CASCADE',
+  })
   public get invitatons(): Invitation[] {
     return this._invitatons;
   }

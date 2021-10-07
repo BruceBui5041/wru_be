@@ -1,4 +1,10 @@
-import { ExecutionContext, Inject, Injectable, UnauthorizedException, CanActivate } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  CanActivate,
+} from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthService } from '../auth.service';
 
@@ -16,12 +22,14 @@ export class GqlMatchStoredToken implements CanActivate {
         const token = Authorization.replace('Bearer ', '');
         const authorized = await this.authService.isMatchStoragedToken(token);
         if (authorized) return true;
-        throw new UnauthorizedException('Some one just login with your account !');
+        throw new UnauthorizedException(
+          'Some one just login with your account !',
+        );
       }
       return false;
     } catch (err) {
       if (!(err instanceof UnauthorizedException)) {
-        throw new UnauthorizedException();
+        throw new UnauthorizedException('Your login token is expired');
       }
       throw err;
     }

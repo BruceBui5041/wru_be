@@ -1,5 +1,11 @@
 import { Field, InputType, registerEnumType } from '@nestjs/graphql';
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import { JouneyVisibility } from '../jouney.enum';
 
 registerEnumType(JouneyVisibility, {
@@ -12,12 +18,14 @@ export class UpdateJouneyDto {
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @MinLength(5)
   @MaxLength(100)
   name?: string;
 
   @Field({ nullable: true })
   @IsOptional()
   @IsString()
+  @MinLength(5)
   @MaxLength(512)
   description?: string;
 
@@ -26,7 +34,7 @@ export class UpdateJouneyDto {
   @IsString()
   image?: string;
 
-  @Field(type => JouneyVisibility, { nullable: true })
+  @Field((type) => JouneyVisibility, { nullable: true })
   @IsOptional()
   @IsIn(Object.values(JouneyVisibility))
   visibility?: JouneyVisibility = JouneyVisibility.PRIVATE;

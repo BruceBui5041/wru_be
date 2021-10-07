@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
 import { Jouney } from './jouney.entity';
@@ -32,7 +36,7 @@ export class JouneyService {
       const jouney = await this.jouneyRepository.findOne(jouneyId);
 
       if (!jouney) {
-        throw new NotFoundException();
+        throw new NotFoundException('Not found the record');
       }
 
       jouney.name = name;
@@ -60,7 +64,9 @@ export class JouneyService {
 
   async countMarker(jouney: Jouney): Promise<number> {
     try {
-      const markerCount = await this.markerRepository.count({ jouney: { uuid: jouney.uuid } });
+      const markerCount = await this.markerRepository.count({
+        jouney: { uuid: jouney.uuid },
+      });
       return markerCount;
     } catch (err) {
       throw new InternalServerErrorException(err.message);

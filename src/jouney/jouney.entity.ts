@@ -52,7 +52,10 @@ export class Jouney extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -79,17 +82,10 @@ export class Jouney extends BaseEntity {
     this._updatedAt = value;
   }
 
-  @ManyToOne(
-    () => User,
-    user => user,
-    { eager: true },
-  )
+  @ManyToOne(() => User, (user) => user, { eager: true })
   @JoinColumn({ name: 'ownerUuid' })
   owner: User;
 
-  @OneToMany(
-    () => Marker,
-    marker => marker.jouney,
-  )
+  @OneToMany(() => Marker, (marker) => marker.jouney, {})
   markers: Marker[];
 }
