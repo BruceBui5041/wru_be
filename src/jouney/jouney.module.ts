@@ -11,7 +11,11 @@ import { MarkerModule } from 'src/marker/marker.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JouneyRepository, UserRepository, MarkerRepository]),
+    TypeOrmModule.forFeature([
+      JouneyRepository,
+      UserRepository,
+      MarkerRepository,
+    ]),
     AuthModule,
     MarkerModule,
   ],

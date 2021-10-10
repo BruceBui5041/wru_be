@@ -15,6 +15,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { JwtPayload } from './auth/jwt-payload.interface';
 import { AuthService } from './auth/auth.service';
+import { SharedJouneyModule } from './shared-jouney/shared-jouney.module';
 
 @Module({
   imports: [
@@ -46,11 +47,14 @@ import { AuthService } from './auth/auth.service';
     // }),
     GraphQLModule.forRoot({
       // autoSchemaFile: 'schema.gql',
+      context: ({ req, connection }) =>
+        connection ? { req: connection.context } : { req },
       autoSchemaFile: true,
       installSubscriptionHandlers: true,
       /** To customize the subscriptions server (e.g., change the listener port) */
       subscriptions: {
-        'graphql-ws': true,
+        // 'graphql-ws': true,
+        'subscriptions-transport-ws': true,
         // get headers
         // onConnect: connectionParams => {
         //   // convert header keys to lowercase
@@ -76,6 +80,7 @@ import { AuthService } from './auth/auth.service';
     UserProfileModule,
     FileModule,
     PubSubModule,
+    SharedJouneyModule,
   ],
 })
 export class AppModule {}

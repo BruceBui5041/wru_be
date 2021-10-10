@@ -17,8 +17,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Invitation } from '../invitations/invitation.entity';
-import { PubSub } from 'graphql-subscriptions';
-import { Inject } from '@nestjs/common';
 
 @Entity('groups')
 export class Group extends BaseEntity {

@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { JwtPayload } from './jwt-payload.interface';
-import { User } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
 
 @Injectable()
@@ -15,7 +18,9 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(authCredentials: SignUpCredentialDto): Promise<{ accessToken: string }> {
+  async signUp(
+    authCredentials: SignUpCredentialDto,
+  ): Promise<{ accessToken: string }> {
     await this.userRepository.signUp(authCredentials);
     const { username, password } = authCredentials;
     /**
@@ -25,14 +30,22 @@ export class AuthService {
     return res;
   }
 
-  async signIn(authCrendentialsDto: SignInCredentialDto): Promise<{ accessToken: string }> {
+  async signIn(
+    authCrendentialsDto: SignInCredentialDto,
+  ): Promise<{ accessToken: string }> {
     try {
-      const user = await this.userRepository.validatePassword(authCrendentialsDto);
-      if (!user?.username) throw new UnauthorizedException(['Invalid username or password']);
+      const user = await this.userRepository.validatePassword(
+        authCrendentialsDto,
+      );
+      if (!user?.username)
+        throw new UnauthorizedException(['Invalid username or password']);
 
       const payload: JwtPayload = { uuid: user.uuid, username: user.username };
       const accessToken = await this.jwtService.sign(payload);
-      await this.userRepository.update({ uuid: user.uuid }, { token: accessToken });
+      await this.userRepository.update(
+        { uuid: user.uuid },
+        { token: accessToken },
+      );
       return { accessToken };
     } catch (err) {
       console.log(err);

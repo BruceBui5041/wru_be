@@ -1,6 +1,7 @@
 import {
   CacheKey,
   CacheTTL,
+  Inject,
   NotFoundException,
   UseGuards,
   ValidationPipe,
@@ -12,6 +13,7 @@ import {
   Query,
   ResolveField,
   Resolver,
+  Subscription,
 } from '@nestjs/graphql';
 import { AuthService } from 'src/auth/auth.service';
 import { GqlGetUser } from 'src/auth/decorators/get-user.gql.decorator';
@@ -27,12 +29,19 @@ import { JouneyRepository } from './jouney.repository';
 import { MarkerGraphQLType } from 'src/marker/marker.gql.type';
 import { MarkerService } from 'src/marker/marker.service';
 import { Marker } from 'src/marker/marker.entity';
+import { GetUser } from 'src/auth/get-user.decorator';
+import { PubSubProvider, SubscriptionNames } from 'src/constants';
+import { PubSub } from 'graphql-subscriptions';
+import { SharedJouney } from 'src/shared-jouney/shared-jouney.entity';
+import { SharedJouneyGraphQLType } from 'src/shared-jouney/shared-jouney.gql.type';
 @Resolver((returns) => JouneyGraphQLType)
 export class JouneyResolver {
   constructor(
     private readonly jouneyService: JouneyService,
     private readonly jouneyRepository: JouneyRepository,
     private readonly markerService: MarkerService,
+    @Inject(PubSubProvider)
+    private pubSub: PubSub,
   ) {}
 
   @Query((returns) => JouneyGraphQLType)
@@ -74,11 +83,12 @@ export class JouneyResolver {
   @Mutation((returns) => JouneyGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   updateJouney(
+    @GqlGetUser() user: User,
     @Args({ name: 'id', type: () => String! })
     id: string,
     @Args({ name: 'jouney', type: () => UpdateJouneyDto }, ValidationPipe)
     jouneyInfo: UpdateJouneyDto,
   ): Promise<Jouney> {
-    return this.jouneyService.update(id, jouneyInfo);
+    return this.jouneyService.update(user, id, jouneyInfo);
   }
 }

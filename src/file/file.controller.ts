@@ -11,6 +11,7 @@ import {
   StreamableFile,
   Req,
   NotFoundException,
+  Response,
 } from '@nestjs/common';
 import { Args } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
@@ -24,13 +25,21 @@ import { deleteUnusedImage, editFileName, imageFileFilter } from '../utils';
 export class FileController {
   @Get('*')
   @UseGuards(AuthGuard())
-  getFile(@Req() req: Request): StreamableFile {
+  getFile(
+    @Req() req: Request,
+    @Response({ passthrough: true }) res,
+  ): StreamableFile {
     const fileName = req.url.split('/')[2];
-    if (!existsSync(join(process.cwd(), `/files/${fileName}`))) {
+    console.log('abcd getFile', req.url);
+    if (!existsSync(join(process.cwd(), `/uploads/${fileName}`))) {
       throw new NotFoundException();
     }
 
-    const file = createReadStream(join(process.cwd(), `/files/${fileName}`));
+    const file = createReadStream(join(process.cwd(), `/uploads/${fileName}`));
+    res.set({
+      'Content-Type': 'image/jpeg',
+      // 'Content-Disposition': 'attachment; filename="package.json"',
+    });
     return new StreamableFile(file);
   }
 

@@ -1,6 +1,13 @@
 import { Inject, UseGuards, ValidationPipe } from '@nestjs/common';
-import { Query, Args, Mutation, Resolver, ResolveField, Parent, Subscription } from '@nestjs/graphql';
-import { PubSub } from 'graphql-subscriptions';
+import {
+  Query,
+  Args,
+  Mutation,
+  Resolver,
+  ResolveField,
+  Parent,
+  Subscription,
+} from '@nestjs/graphql';
 import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
 import { SubscriptionNames } from '../constants';
 import { UserGraphQLType } from '../user/user.gql.type';
@@ -14,36 +21,45 @@ import { Group } from './group.entity';
 import { GroupGraphQLType } from './group.gql.type';
 import { GroupService } from './group.service';
 
-@Resolver(type => GroupGraphQLType)
+@Resolver((type) => GroupGraphQLType)
 export class GroupResolver {
-  constructor(private readonly groupService: GroupService, private readonly authService: AuthService) {}
+  constructor(
+    private readonly groupService: GroupService,
+    private readonly authService: AuthService,
+  ) {}
 
-  @Query(returns => [GroupGraphQLType])
+  @Query((returns) => [GroupGraphQLType])
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   fetchMyGroups(
     @GqlGetUser() user: User,
-    @Args({ name: 'fetchingOptions', type: () => FetchMyGroupsDto }, ValidationPipe)
+    @Args(
+      { name: 'fetchingOptions', type: () => FetchMyGroupsDto },
+      ValidationPipe,
+    )
     fetchMyGroupsDto: FetchMyGroupsDto,
   ): Promise<Group[]> {
     return this.groupService.fetchMyGroups(user, fetchMyGroupsDto);
   }
 
-  @ResolveField(returns => [UserGraphQLType], { name: 'members' })
+  @ResolveField((returns) => [UserGraphQLType], { name: 'members' })
   async members(@Parent() group: Group): Promise<User[]> {
     return this.groupService.fetchGroupMembers(group);
   }
 
-  @Mutation(returns => GroupGraphQLType)
+  @Mutation((returns) => GroupGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   createGroup(
     @GqlGetUser() user: User,
-    @Args({ name: 'createGroupInput', type: () => CreateGroupDto }, ValidationPipe)
+    @Args(
+      { name: 'createGroupInput', type: () => CreateGroupDto },
+      ValidationPipe,
+    )
     createGroupDto: CreateGroupDto,
   ): Promise<Group> {
     return this.groupService.createGroup(user, createGroupDto);
   }
 
-  @Subscription(returns => GroupGraphQLType, {
+  @Subscription((returns) => GroupGraphQLType, {
     name: SubscriptionNames.onChangeGroup,
     /** To filter out specific events */
     async filter(this: GroupResolver, payloadGroup: Group, variables) {

@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   OneToMany,
   OneToOne,
@@ -15,6 +16,7 @@ import { Group } from '../group/group.entity';
 import { JoinInRequest } from '../join-in-request/join-in-request.entity';
 import { Invitation } from '../invitations/invitation.entity';
 import { UserProfile } from '../user-profile/user-profile.entity';
+import { SharedJouney } from 'src/shared-jouney/shared-jouney.entity';
 
 @Entity('user')
 export class User extends BaseEntity {
@@ -57,8 +59,10 @@ export class User extends BaseEntity {
   /**
    * -----------------------------------------------------
    */
+
   private _username: string;
 
+  @Index('username-idx', { fulltext: true })
   @Column({ name: 'username', unique: true })
   public get username(): string {
     return this._username;
@@ -73,7 +77,8 @@ export class User extends BaseEntity {
    */
   private _email: string;
 
-  @Column({ name: 'email', nullable: true })
+  @Index('email-idx', { fulltext: true })
+  @Column({ name: 'email', nullable: true, unique: true })
   public get email(): string {
     return this._email;
   }
@@ -114,7 +119,10 @@ export class User extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -146,11 +154,7 @@ export class User extends BaseEntity {
    */
   private _groups: Group[];
 
-  @OneToMany(
-    () => Group,
-    group => group.owner,
-    { onDelete: 'CASCADE' },
-  )
+  @OneToMany(() => Group, (group) => group.owner, { onDelete: 'CASCADE' })
   public get groups(): Group[] {
     return this._groups;
   }
@@ -164,10 +168,7 @@ export class User extends BaseEntity {
    */
   private _invitations: Invitation[];
 
-  @OneToMany(
-    () => Invitation,
-    invitation => invitation.owner,
-  )
+  @OneToMany(() => Invitation, (invitation) => invitation.owner)
   public get invitations(): Invitation[] {
     return this._invitations;
   }
@@ -181,10 +182,7 @@ export class User extends BaseEntity {
    */
   private _joinInRequest: JoinInRequest[];
 
-  @OneToMany(
-    () => JoinInRequest,
-    joinInRequest => joinInRequest.owner,
-  )
+  @OneToMany(() => JoinInRequest, (joinInRequest) => joinInRequest.owner)
   public get joinInRequests(): JoinInRequest[] {
     return this._joinInRequest;
   }
@@ -195,15 +193,14 @@ export class User extends BaseEntity {
 
   private _profile: UserProfile;
 
-  @OneToOne(
-    () => UserProfile,
-    user => user.owner,
-    { eager: true },
-  )
+  @OneToOne(() => UserProfile, (user) => user.owner, { eager: true })
   @JoinColumn()
   public get profile(): UserProfile {
     return this._profile;
   }
+
+  @OneToMany((type) => SharedJouney, (sharedJouney) => sharedJouney.jouneyOwner)
+  sharedJouney: SharedJouney[];
 
   public set profile(value: UserProfile) {
     this._profile = value;

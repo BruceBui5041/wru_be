@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { User } from 'src/user/user.entity';
 import { EntityRepository, Repository } from 'typeorm';
 import { Jouney } from './jouney.entity';

@@ -1,7 +1,10 @@
 import {
+  HttpException,
   Injectable,
   InternalServerErrorException,
+  NotAcceptableException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/user.entity';
@@ -10,7 +13,11 @@ import { JouneyRepository } from './jouney.repository';
 import { InputJouneyDto } from './dto/input-jouney.dto';
 import { UpdateJouneyDto } from './dto/update-jouney.dto';
 import { MarkerRepository } from 'src/marker/marker.repository';
-import { Marker } from 'src/marker/marker.entity';
+import { UserRepository } from 'src/user/user.repository';
+import { SharedJouneyRepository } from 'src/shared-jouney/shared-jouney.repository';
+import { PubSub } from 'graphql-subscriptions';
+import { SubscriptionNames } from 'src/constants';
+import { SharedJouney } from 'src/shared-jouney/shared-jouney.entity';
 
 @Injectable()
 export class JouneyService {
@@ -30,10 +37,18 @@ export class JouneyService {
     }
   }
 
-  async update(jouneyId: string, jouneyInfo: UpdateJouneyDto): Promise<Jouney> {
+  async update(
+    user: User,
+    jouneyId: string,
+    jouneyInfo: UpdateJouneyDto,
+  ): Promise<Jouney> {
     try {
       const { name, image, description, visibility } = jouneyInfo;
       const jouney = await this.jouneyRepository.findOne(jouneyId);
+
+      if (user.uuid != jouney.owner.uuid) {
+        throw new UnauthorizedException('You are not the owner of this jouney');
+      }
 
       if (!jouney) {
         throw new NotFoundException('Not found the record');

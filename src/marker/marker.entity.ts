@@ -15,6 +15,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -44,12 +45,14 @@ export class Marker extends BaseEntity {
   @IsUUID()
   uuid: string;
 
+  @Index('marker-name-idx', { fulltext: true })
   @Column({ nullable: true, length: 100 })
   @IsOptional()
   @IsString()
   @MaxLength(100)
   name?: string;
 
+  @Index('description-name-idx', { fulltext: true })
   @Column({ nullable: true, length: 512 })
   @IsOptional()
   @IsString()

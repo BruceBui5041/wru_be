@@ -6,7 +6,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -14,6 +17,7 @@ import {
 } from 'typeorm';
 import { InputJouneyDto } from './dto/input-jouney.dto';
 import { JouneyVisibility } from './jouney.enum';
+import { SharedJouney } from 'src/shared-jouney/shared-jouney.entity';
 
 @Entity('jouneys')
 export class Jouney extends BaseEntity {
@@ -29,14 +33,22 @@ export class Jouney extends BaseEntity {
     }
   }
 
+  static joinUserTable = {
+    tableName: 'shared_jouney_user',
+    userUuid: 'userUuid',
+    jouneyUuid: 'jouneyUuid',
+  };
+
   @PrimaryGeneratedColumn('uuid')
   @IsUUID()
   uuid: string;
 
+  @Index('jouney-name-idx', { fulltext: true })
   @Column({ length: 100 })
   @MaxLength(100)
   name: string;
 
+  @Index('jouney-description-idx', { fulltext: true })
   @Column({ nullable: true, length: 512 })
   @MaxLength(512)
   description: string;
@@ -88,4 +100,7 @@ export class Jouney extends BaseEntity {
 
   @OneToMany(() => Marker, (marker) => marker.jouney, {})
   markers: Marker[];
+
+  @OneToMany((type) => SharedJouney, (sharedJouney) => sharedJouney.jouney)
+  sharedJouney: SharedJouney[];
 }
