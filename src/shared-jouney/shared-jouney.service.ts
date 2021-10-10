@@ -25,6 +25,96 @@ export class SharedJouneyService {
     private readonly sharedJouneyRepository: SharedJouneyRepository,
   ) {}
 
+  async fetchSharedJouney(user: User, owner: boolean): Promise<SharedJouney[]> {
+    try {
+      return owner
+        ? await this.sharedJouneyRepository.selectMySharedJouney(user)
+        : await this.sharedJouneyRepository.selectSharedJouney(user);
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async checkSharedJouney(
+    user: User,
+    sharedJouneyId: string,
+    pubSub: PubSub,
+  ): Promise<SharedJouney> {
+    try {
+      const sharedJouney = await this.sharedJouneyRepository.findOne({
+        where: { uuid: sharedJouneyId },
+      });
+
+      if (!sharedJouney)
+        throw new NotFoundException('Shared jouney is not found');
+
+      if (user.uuid != sharedJouney.sharedUser.uuid) {
+        throw new NotAcceptableException('You can not do this action');
+      }
+
+      if (sharedJouney.checked) return sharedJouney;
+      sharedJouney.checked = true;
+
+      const updatedSharedJouney = await this.sharedJouneyRepository.save(
+        sharedJouney,
+      );
+
+      const subcriptionResponse = new SharedJouneySubcriptionDto(
+        'change',
+        sharedJouney,
+      );
+
+      pubSub?.publish(
+        SubscriptionNames.onChangedSharedJouney,
+        subcriptionResponse,
+      );
+
+      return updatedSharedJouney;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async acceptSharedJouney(
+    user: User,
+    sharedJouneyId: string,
+    pubSub: PubSub,
+  ): Promise<SharedJouney> {
+    try {
+      const sharedJouney = await this.sharedJouneyRepository.findOne({
+        where: { uuid: sharedJouneyId },
+      });
+
+      if (!sharedJouney)
+        throw new NotFoundException('Shared jouney is not found');
+
+      if (user.uuid != sharedJouney.sharedUser.uuid) {
+        throw new NotAcceptableException('You can not do this action');
+      }
+
+      if (sharedJouney.accepted) return sharedJouney;
+      sharedJouney.accepted = true;
+
+      const updatedSharedJouney = await this.sharedJouneyRepository.save(
+        sharedJouney,
+      );
+
+      const subcriptionResponse = new SharedJouneySubcriptionDto(
+        'change',
+        sharedJouney,
+      );
+
+      pubSub?.publish(
+        SubscriptionNames.onChangedSharedJouney,
+        subcriptionResponse,
+      );
+
+      return updatedSharedJouney;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   async shareJouney(
     jouneyId: string,
     owner: User,

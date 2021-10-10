@@ -27,7 +27,13 @@ export class SharedJouney extends BaseEntity {
   @IsUUID()
   uuid: string;
 
-  @ManyToOne((type) => Jouney, (joueny) => joueny.sharedJouney, {
+  @Column('bool', { default: false })
+  checked: boolean;
+
+  @Column('bool', { default: false })
+  accepted: boolean;
+
+  @ManyToOne((type) => Jouney, (jouney) => jouney.sharedJouney, {
     primary: true,
     eager: true,
   })

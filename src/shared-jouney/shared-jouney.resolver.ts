@@ -1,5 +1,5 @@
 import { Inject, UseGuards } from '@nestjs/common';
-import { Args, Mutation, Resolver, Subscription } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
 import { GqlGetUser } from 'src/auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from 'src/auth/guards/auth.guard.gql';
@@ -19,9 +19,39 @@ export class SharedJouneyResolver {
     private pubSub: PubSub,
   ) {}
 
+  @Query((returns) => [SharedJouneyGraphQLType])
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  fetchSharedJouney(
+    @GqlGetUser() user: User,
+    @Args({ name: 'owner', type: () => Boolean!, nullable: true })
+    owner: boolean = false,
+  ) {
+    return this.sharedJouneyService.fetchSharedJouney(user, owner);
+  }
+
   @Mutation((returns) => SharedJouneyGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
-  async shareJouney(
+  checkSharedJouney(
+    @GqlGetUser() user: User,
+    @Args({ name: 'sharedJouneyId', type: () => String! })
+    id: string,
+  ): Promise<SharedJouney> {
+    return this.sharedJouneyService.checkSharedJouney(user, id, this.pubSub);
+  }
+
+  @Mutation((returns) => SharedJouneyGraphQLType)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  acceptSharedJouney(
+    @GqlGetUser() user: User,
+    @Args({ name: 'sharedJouneyId', type: () => String! })
+    id: string,
+  ): Promise<SharedJouney> {
+    return this.sharedJouneyService.acceptSharedJouney(user, id, this.pubSub);
+  }
+
+  @Mutation((returns) => SharedJouneyGraphQLType)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  shareJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'jouneyId', type: () => String! })
     id: string,
@@ -43,9 +73,7 @@ export class SharedJouneyResolver {
       const { data, event } = payload;
 
       return (
-        [data.jouneyOwner.uuid, data.sharedUser.uuid].includes(
-          variables.userUuid,
-        ) && variables.event == event
+        data.sharedUser.token == variables.userToken && variables.event == event
       );
     },
     /** Mutating subscription payloads */
@@ -54,7 +82,7 @@ export class SharedJouneyResolver {
     },
   })
   onChangeSharedJouney(
-    @Args({ name: 'userUuid' }) userUuid: string,
+    @Args({ name: 'userToken' }) userToken: string,
     @Args({ name: 'event' }) event: string,
   ) {
     return this.pubSub.asyncIterator(SubscriptionNames.onChangedSharedJouney);
