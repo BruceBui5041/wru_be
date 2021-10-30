@@ -18,29 +18,27 @@ export class UserResolver {
     private userProfileService: UserProfileService,
   ) {}
 
+  @Query((returns) => [UserGraphQLType])
+  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  searchUsers(
+    @GqlGetUser() user: User,
+    @Args({ name: 'searchQuery', type: () => String! })
+    searchQuery: string,
+  ): Promise<User[]> {
+    return this.userService.searchUsers(user, searchQuery);
+  }
+
   @Query((returns) => UserGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   fetchUserProfile(@GqlGetUser() user: User): Promise<User> {
     return this.userService.fetchUserProfile(user);
   }
 
-  @Query((returns) => [UserGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
-  searchUsers(
-    @Args({ name: 'searchQuery', type: () => String! })
-    searchQuery: string,
-  ): Promise<User[]> {
-    return this.userService.searchUsers(searchQuery);
-  }
-
   @Mutation((returns) => UserGraphQLType)
   @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
   async updateUserProfile(
     @GqlGetUser() user: User,
-    @Args(
-      { name: 'profileInput', type: () => UpdateProfileDto },
-      ValidationPipe,
-    )
+    @Args({ name: 'profile', type: () => UpdateProfileDto }, ValidationPipe)
     updateProfileDto: UpdateProfileDto,
   ): Promise<User> {
     user.profile = await this.userProfileService.updateUserProfile(

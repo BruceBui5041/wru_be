@@ -8,7 +8,7 @@ export class UpdateProfileDto {
 
   @Field({ nullable: true, defaultValue: null })
   @IsUrl()
-  avatarUrl: string;
+  image: string;
 
   @Field({ nullable: true, defaultValue: null })
   status: string;

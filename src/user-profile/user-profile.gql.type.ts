@@ -9,7 +9,7 @@ export class UserProfileGraphQLType {
   phoneNumber: string;
 
   @Field({ defaultValue: '', nullable: true })
-  avatarUrl: string;
+  image: string;
 
   @Field({ defaultValue: '', nullable: true })
   status: string;

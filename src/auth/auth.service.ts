@@ -8,7 +8,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { JwtPayload } from './jwt-payload.interface';
+import * as bcrypt from 'bcrypt';
 import { UserRepository } from '../user/user.repository';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +22,7 @@ export class AuthService {
 
   async signUp(
     authCredentials: SignUpCredentialDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; username: string }> {
     await this.userRepository.signUp(authCredentials);
     const { username, password } = authCredentials;
     /**
@@ -32,7 +34,7 @@ export class AuthService {
 
   async signIn(
     authCrendentialsDto: SignInCredentialDto,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string; username: string }> {
     try {
       const user = await this.userRepository.validatePassword(
         authCrendentialsDto,
@@ -40,15 +42,32 @@ export class AuthService {
       if (!user?.username)
         throw new UnauthorizedException(['Invalid username or password']);
 
-      const payload: JwtPayload = { uuid: user.uuid, username: user.username };
+      const payload: JwtPayload = {
+        uuid: user.uuid,
+        username: user.username,
+
+        salt: await bcrypt.genSalt(),
+      };
+
       const accessToken = await this.jwtService.sign(payload);
       await this.userRepository.update(
         { uuid: user.uuid },
         { token: accessToken },
       );
-      return { accessToken };
+      return { accessToken, username: user.username };
     } catch (err) {
       console.log(err);
+      throw err;
+    }
+  }
+
+  async logOut(user: User) {
+    try {
+      await this.userRepository.update(user.uuid, {
+        token: '',
+        refreshToken: '',
+      });
+    } catch (err) {
       throw err;
     }
   }
@@ -56,7 +75,7 @@ export class AuthService {
   async isMatchStoragedToken(sentToken: string): Promise<boolean> {
     const { uuid } = this.jwtService.verify(sentToken) as JwtPayload;
     if (uuid) {
-      const user = await this.userRepository.findOne({ uuid: uuid });
+      const user = await this.userRepository.findOne(uuid);
       return user.token == sentToken;
     }
     return false;

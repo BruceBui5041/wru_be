@@ -199,7 +199,13 @@ export class User extends BaseEntity {
     return this._profile;
   }
 
-  @OneToMany((type) => SharedJouney, (sharedJouney) => sharedJouney.jouneyOwner)
+  @OneToMany(
+    (type) => SharedJouney,
+    (sharedJouney) => sharedJouney.jouneyOwner,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   sharedJouney: SharedJouney[];
 
   public set profile(value: UserProfile) {

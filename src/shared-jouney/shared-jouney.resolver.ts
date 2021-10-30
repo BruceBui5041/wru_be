@@ -55,13 +55,13 @@ export class SharedJouneyResolver {
     @GqlGetUser() user: User,
     @Args({ name: 'jouneyId', type: () => String! })
     id: string,
-    @Args({ name: 'userSharedId', type: () => String! })
-    userSharedId: string,
+    @Args({ name: 'userSharedName', type: () => String! })
+    userSharedName: string,
   ): Promise<SharedJouney> {
     return this.sharedJouneyService.shareJouney(
       id,
       user,
-      userSharedId,
+      userSharedName,
       this.pubSub,
     );
   }

@@ -101,6 +101,8 @@ export class Jouney extends BaseEntity {
   @OneToMany(() => Marker, (marker) => marker.jouney, {})
   markers: Marker[];
 
-  @OneToMany((type) => SharedJouney, (sharedJouney) => sharedJouney.jouney)
+  @OneToMany((type) => SharedJouney, (sharedJouney) => sharedJouney.jouney, {
+    onDelete: 'CASCADE',
+  })
   sharedJouney: SharedJouney[];
 }

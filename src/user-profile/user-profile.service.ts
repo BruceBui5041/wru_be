@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../user/user.entity';
 import { UserRepository } from '../user/user.repository';
@@ -9,24 +13,37 @@ import { UserProfileRepository } from './user-profile.repository';
 @Injectable()
 export class UserProfileService {
   constructor(
-    @InjectRepository(UserProfileRepository) private readonly userProfileRepo: UserProfileRepository,
-    @InjectRepository(UserRepository) private readonly userRepo: UserRepository,
+    @InjectRepository(UserProfileRepository)
+    private readonly userProfileRepository: UserProfileRepository,
+    @InjectRepository(UserRepository)
+    private readonly userRepository: UserRepository,
   ) {}
 
-  async updateUserProfile(user: User, profileDto: UpdateProfileDto): Promise<UserProfile> {
+  async updateUserProfile(
+    user: User,
+    profileDto: UpdateProfileDto,
+  ): Promise<UserProfile> {
     try {
-      const existsProfile = await this.userProfileRepo.findOne({ owner: user });
+      const existsProfile = await this.userProfileRepository.findOne({
+        owner: { uuid: user.uuid },
+      });
       if (existsProfile) {
-        return this.userProfileRepo.save({ uuid: existsProfile.uuid, ...profileDto });
+        return this.userProfileRepository.save({
+          uuid: existsProfile.uuid,
+          ...profileDto,
+        });
       }
 
-      const profile = new UserProfile();
-      profile.createNewUserProfile(user, profileDto);
-      await profile.save();
-      await this.userRepo.update({ uuid: user.uuid }, { profile: profile });
-      return profile;
+      const profile = new UserProfile(user, profileDto);
+      const newProfile = await profile.save();
+
+      await this.userRepository.update(
+        { uuid: user.uuid },
+        { profile: newProfile },
+      );
+      return newProfile;
     } catch (err) {
-      throw err;
+      throw new InternalServerErrorException(err.message);
     }
   }
 }

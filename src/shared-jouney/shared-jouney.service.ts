@@ -49,7 +49,9 @@ export class SharedJouneyService {
         throw new NotFoundException('Shared jouney is not found');
 
       if (user.uuid != sharedJouney.sharedUser.uuid) {
-        throw new NotAcceptableException('You can not do this action');
+        throw new NotAcceptableException(
+          "You are not the user who's shared to check",
+        );
       }
 
       if (sharedJouney.checked) return sharedJouney;
@@ -89,7 +91,9 @@ export class SharedJouneyService {
         throw new NotFoundException('Shared jouney is not found');
 
       if (user.uuid != sharedJouney.sharedUser.uuid) {
-        throw new NotAcceptableException('You can not do this action');
+        throw new NotAcceptableException(
+          "You are not the user who's shared to accept",
+        );
       }
 
       if (sharedJouney.accepted) return sharedJouney;
@@ -125,13 +129,20 @@ export class SharedJouneyService {
       let jouney = await this.jouneyRepository.findOne(jouneyId);
       if (!jouney) throw new NotFoundException('Jouney not found');
 
-      if (jouney.owner.uuid !== owner.uuid)
-        throw new UnauthorizedException('You are not the owner of this jouney');
+      if (jouney.owner.uuid !== owner.uuid) {
+        throw new UnauthorizedException(
+          'You are not the owner of this journey',
+        );
+      }
 
       const userShared = await this.userRepository.findOne({
         where: { username: userSharedName },
       });
       if (!userShared) throw new NotFoundException('User shared is not found');
+
+      if (owner.uuid == userShared.uuid) {
+        throw new NotAcceptableException('You cannot share your own journey');
+      }
 
       const sharedJouney = await this.sharedJouneyRepository.createSharedJouney(
         jouney,
@@ -141,7 +152,7 @@ export class SharedJouneyService {
 
       if (!sharedJouney.uuid)
         throw new NotAcceptableException(
-          'You already shared this jouney to this user',
+          'You already shared this journey to this user',
         );
 
       const subcriptionResponse = new SharedJouneySubcriptionDto(

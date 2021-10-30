@@ -1,4 +1,11 @@
-import { Body, Controller, Post, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { SignUpValidationPipe } from './pipes/signup.pipe';
@@ -6,6 +13,7 @@ import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { GetUser } from './get-user.decorator';
 import { User } from '../user/user.entity';
+import { MatchStoredToken } from './guards/match-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,6 +28,12 @@ export class AuthController {
   @Post('/signin')
   async signin(@Body(ValidationPipe) authCredentials: SignInCredentialDto) {
     return this.authService.signIn(authCredentials);
+  }
+
+  @Post('/logout')
+  @UseGuards(AuthGuard(), MatchStoredToken)
+  logout(@GetUser() user: User) {
+    return this.authService.logOut(user);
   }
 
   @Post('/verify_token')

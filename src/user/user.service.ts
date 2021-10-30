@@ -1,30 +1,39 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like } from 'typeorm';
 import { UserProfileRepository } from '../user-profile/user-profile.repository';
 import { User } from './user.entity';
 import { UserRepository } from './user.repository';
+import { compact } from 'lodash';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserProfileRepository)
-    private readonly userProfileRepo: UserProfileRepository,
+    private readonly userProfileRepository: UserProfileRepository,
     @InjectRepository(UserRepository)
     private userRepository: UserRepository,
   ) {}
 
   async fetchUserProfile(user: User): Promise<User> {
-    user.profile = await this.userProfileRepo.findOne({ owner: user });
+    user.profile = await this.userProfileRepository.findOne({ owner: user });
     return user;
   }
 
-  async searchUsers(searchQuery: string): Promise<User[]> {
+  async searchUsers(user: User, searchQuery: string): Promise<User[]> {
+    let desired = searchQuery.replace(
+      /[`~!@#$%^&*()_|+\-=?;:'",.<>\{\}\[\]\\\/]/gi,
+      ' ',
+    );
+
+    desired = compact(desired.split(' ')).length == 0 ? '' : desired + '*';
+
     return await this.userRepository
       .createQueryBuilder()
       .select()
-      .where(`MATCH(username) AGAINST ('${searchQuery}*' IN BOOLEAN MODE)`)
-      .orWhere(`MATCH(email) AGAINST ('${searchQuery}*' IN BOOLEAN MODE)`)
+      .where(`username != '${user.username}'`)
+      .andWhere(
+        `(MATCH(username) AGAINST ('${desired}' IN BOOLEAN MODE) OR MATCH(email) AGAINST ('${desired}' IN BOOLEAN MODE))`,
+      )
       .getMany();
   }
 }

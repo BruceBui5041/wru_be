@@ -14,6 +14,16 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Entity('user_profile')
 export class UserProfile extends BaseEntity {
+  constructor(owner: User, updateProfileDto: UpdateProfileDto) {
+    super();
+    // const { image, phoneNumber, placesWantToGoTo, status } = updateProfileDto;
+    this.owner = owner;
+    this.image = updateProfileDto?.image;
+    this.phoneNumber = updateProfileDto?.phoneNumber;
+    this.placesWantToGoTo = updateProfileDto?.placesWantToGoTo;
+    this.status = updateProfileDto?.status;
+  }
+
   private _uuid: string;
 
   @PrimaryGeneratedColumn('uuid', { name: 'uuid' })
@@ -36,15 +46,15 @@ export class UserProfile extends BaseEntity {
     this._phoneNumber = value;
   }
 
-  private _avatarUrl: string;
+  private _image: string;
 
-  @Column({ name: 'avatarUrl', nullable: true })
+  @Column({ name: 'image', nullable: true })
   @IsUrl()
-  public get avatarUrl(): string {
-    return this._avatarUrl;
+  public get image(): string {
+    return this._image;
   }
-  public set avatarUrl(value: string) {
-    this._avatarUrl = value;
+  public set image(value: string) {
+    this._image = value;
   }
 
   private _status: string;
@@ -72,7 +82,10 @@ export class UserProfile extends BaseEntity {
    */
   private _createdAt: Date;
 
-  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP(6)' })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP(6)',
+  })
   public get createdAt(): Date {
     return this._createdAt;
   }
@@ -108,14 +121,5 @@ export class UserProfile extends BaseEntity {
   }
   public set owner(value: User) {
     this._owner = value;
-  }
-
-  createNewUserProfile(owner: User, updateProfileDto: UpdateProfileDto) {
-    const { avatarUrl, phoneNumber, placesWantToGoTo, status } = updateProfileDto;
-    this.owner = owner;
-    this.avatarUrl = avatarUrl;
-    this.phoneNumber = phoneNumber;
-    this.placesWantToGoTo = placesWantToGoTo;
-    this.status = status;
   }
 }

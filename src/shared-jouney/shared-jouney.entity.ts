@@ -36,18 +36,21 @@ export class SharedJouney extends BaseEntity {
   @ManyToOne((type) => Jouney, (jouney) => jouney.sharedJouney, {
     primary: true,
     eager: true,
+    onDelete: 'CASCADE',
   })
   jouney: Jouney;
 
   @ManyToOne((type) => User, (user) => user.sharedJouney, {
     primary: true,
     eager: true,
+    onDelete: 'CASCADE',
   })
   jouneyOwner: User;
 
   @ManyToOne((type) => User, (user) => user.sharedJouney, {
     primary: true,
     eager: true,
+    onDelete: 'CASCADE',
   })
   sharedUser: User;
 
