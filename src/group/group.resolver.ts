@@ -8,7 +8,7 @@ import {
   Parent,
   Subscription,
 } from '@nestjs/graphql';
-import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
+import { GqlMatchStoredTokenGuard } from '../auth/guards/match-token.guard.gql';
 import { SubscriptionNames } from '../constants';
 import { UserGraphQLType } from '../user/user.gql.type';
 import { AuthService } from '../auth/auth.service';
@@ -29,7 +29,7 @@ export class GroupResolver {
   ) {}
 
   @Query((returns) => [GroupGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   fetchMyGroups(
     @GqlGetUser() user: User,
     @Args(
@@ -47,7 +47,7 @@ export class GroupResolver {
   }
 
   @Mutation((returns) => GroupGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   createGroup(
     @GqlGetUser() user: User,
     @Args(
@@ -72,7 +72,7 @@ export class GroupResolver {
       return value.onChangeGroup;
     },
   })
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   onChangeGroups(@GqlGetUser() user: User): Promise<Group> {
     return;
   }

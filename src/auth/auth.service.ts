@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SignInCredentialDto } from './dto/signin-credential.dto';
@@ -64,8 +60,8 @@ export class AuthService {
   async logOut(user: User) {
     try {
       await this.userRepository.update(user.uuid, {
-        token: '',
-        refreshToken: '',
+        token: null,
+        refreshToken: null,
       });
     } catch (err) {
       throw err;
@@ -73,11 +69,25 @@ export class AuthService {
   }
 
   async isMatchStoragedToken(sentToken: string): Promise<boolean> {
-    const { uuid } = this.jwtService.verify(sentToken) as JwtPayload;
+    const { uuid } = this.jwtService.verify<JwtPayload>(sentToken);
+
     if (uuid) {
       const user = await this.userRepository.findOne(uuid);
       return user.token == sentToken;
     }
     return false;
+  }
+
+  isTokenExpired(sentToken: string): boolean {
+    const result = this.jwtService.decode(sentToken);
+    if (typeof result == 'string') return false;
+    return Date.now() >= result.exp * 1000;
+  }
+
+  async isValidToken(sentToken: string): Promise<boolean> {
+    return (
+      (await this.isMatchStoragedToken(sentToken)) &&
+      this.isTokenExpired(sentToken)
+    );
   }
 }

@@ -8,7 +8,7 @@ import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { Invitation } from './invitation.entity';
 import { InvitationGraphQLType } from './dto/invitation.gql.type';
 import { InvitationService } from './invitation.service';
-import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
+import { GqlMatchStoredTokenGuard } from '../auth/guards/match-token.guard.gql';
 import { FetchInvitationDto } from './dto/fetch-my-invitations.dto';
 import { PubSub } from 'graphql-subscriptions';
 import { PubSubProvider, SubscriptionNames } from '../constants';
@@ -23,8 +23,8 @@ export class InvitationResolver {
     private pubSub: PubSub,
   ) {}
 
-  @Query(returns => [InvitationGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @Query((returns) => [InvitationGraphQLType])
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   fetchMyInvitations(
     @GqlGetUser() user: User,
     @Args({ name: 'fetchOptions', type: () => FetchInvitationDto })
@@ -33,35 +33,62 @@ export class InvitationResolver {
     return this.invitationService.fetchMyInvitations(user, fetchInvitationDto);
   }
 
-  @Mutation(returns => InvitationGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @Mutation((returns) => InvitationGraphQLType)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   async responseToInvitation(
     @GqlGetUser() user: User,
-    @Args({ name: 'acceptInput', type: () => AcceptInvitationDto }) acceptInvitationDto: AcceptInvitationDto,
+    @Args({ name: 'acceptInput', type: () => AcceptInvitationDto })
+    acceptInvitationDto: AcceptInvitationDto,
   ): Promise<Invitation> {
-    const result = await this.invitationService.responseInvitation(user, acceptInvitationDto);
-    const changeInvitationDto: OnChangeInvitationDto = { type: 'response', invitation: result };
-    this.pubSub.publish(SubscriptionNames.onChangeInvitations, changeInvitationDto);
+    const result = await this.invitationService.responseInvitation(
+      user,
+      acceptInvitationDto,
+    );
+    const changeInvitationDto: OnChangeInvitationDto = {
+      type: 'response',
+      invitation: result,
+    };
+    this.pubSub.publish(
+      SubscriptionNames.onChangeInvitations,
+      changeInvitationDto,
+    );
     return result;
   }
 
-  @Mutation(returns => InvitationGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @Mutation((returns) => InvitationGraphQLType)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   async createInvitation(
     @GqlGetUser() user: User,
-    @Args('createInvitationInput', ValidationPipe) createInvitationDto: CreateInvitationDto,
+    @Args('createInvitationInput', ValidationPipe)
+    createInvitationDto: CreateInvitationDto,
   ): Promise<Invitation> {
-    const result = await this.invitationService.createInvitation(user, createInvitationDto);
-    const changeInvitationDto: OnChangeInvitationDto = { type: 'insert', invitation: result };
-    this.pubSub.publish(SubscriptionNames.onChangeInvitations, changeInvitationDto);
+    const result = await this.invitationService.createInvitation(
+      user,
+      createInvitationDto,
+    );
+    const changeInvitationDto: OnChangeInvitationDto = {
+      type: 'insert',
+      invitation: result,
+    };
+    this.pubSub.publish(
+      SubscriptionNames.onChangeInvitations,
+      changeInvitationDto,
+    );
     return result;
   }
 
-  @Subscription(returns => SubscriptionInvitationGraphQLType, {
+  @Subscription((returns) => SubscriptionInvitationGraphQLType, {
     name: SubscriptionNames.onChangeInvitations,
-    async filter(this: InvitationResolver, payload: OnChangeInvitationDto, variables) {
+    async filter(
+      this: InvitationResolver,
+      payload: OnChangeInvitationDto,
+      variables,
+    ) {
       const invitation = payload.invitation;
-      return [invitation.invitedUser.username, invitation.owner.username].includes(variables.username);
+      return [
+        invitation.invitedUser.username,
+        invitation.owner.username,
+      ].includes(variables.username);
     },
     resolve(this: InvitationResolver, value: OnChangeInvitationDto) {
       return value;

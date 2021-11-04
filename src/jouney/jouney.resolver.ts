@@ -18,7 +18,7 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { GqlGetUser } from 'src/auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from 'src/auth/guards/auth.guard.gql';
-import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
+import { GqlMatchStoredTokenGuard } from 'src/auth/guards/match-token.guard.gql';
 import { User } from 'src/user/user.entity';
 import { Jouney } from './jouney.entity';
 import { JouneyService } from './jouney.service';
@@ -45,17 +45,20 @@ export class JouneyResolver {
   ) {}
 
   @Query((returns) => JouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   async jouney(
     @Args({ name: 'id', type: () => String! }) id: String,
+    @GqlGetUser() user: User,
   ): Promise<Jouney> {
-    const jouney = await this.jouneyRepository.findOne({ where: { uuid: id } });
+    const jouney = await this.jouneyRepository.findOne({
+      where: { uuid: id, owner: { uuid: user.uuid } },
+    });
     if (!jouney) throw new NotFoundException('Not found the record');
     return jouney;
   }
 
   @Query((returns) => [JouneyGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   jouneys(@GqlGetUser() user: User): Promise<Jouney[]> {
     return this.jouneyService.fetchAllMyJouney(user);
   }
@@ -71,7 +74,7 @@ export class JouneyResolver {
   }
 
   @Mutation((returns) => JouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   createJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'jouney', type: () => InputJouneyDto }, ValidationPipe)
@@ -81,7 +84,7 @@ export class JouneyResolver {
   }
 
   @Mutation((returns) => JouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   updateJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'id', type: () => String! })

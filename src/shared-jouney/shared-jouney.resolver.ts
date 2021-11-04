@@ -1,9 +1,10 @@
 import { Inject, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver, Subscription } from '@nestjs/graphql';
 import { PubSub } from 'graphql-subscriptions';
+import { AuthService } from 'src/auth/auth.service';
 import { GqlGetUser } from 'src/auth/decorators/get-user.gql.decorator';
 import { GqlAuthGuard } from 'src/auth/guards/auth.guard.gql';
-import { GqlMatchStoredToken } from 'src/auth/guards/match-token.guard.gql';
+import { GqlMatchStoredTokenGuard } from 'src/auth/guards/match-token.guard.gql';
 import { PubSubProvider, SubscriptionNames } from 'src/constants';
 import { User } from 'src/user/user.entity';
 import { SharedJouneySubcriptionDto } from './dto/shared-jouney-subscription.dto';
@@ -15,12 +16,13 @@ import { SharedJouneyService } from './shared-jouney.service';
 export class SharedJouneyResolver {
   constructor(
     private readonly sharedJouneyService: SharedJouneyService,
+    private readonly authService: AuthService,
     @Inject(PubSubProvider)
     private pubSub: PubSub,
   ) {}
 
   @Query((returns) => [SharedJouneyGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   fetchSharedJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'owner', type: () => Boolean!, nullable: true })
@@ -30,7 +32,7 @@ export class SharedJouneyResolver {
   }
 
   @Mutation((returns) => SharedJouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   checkSharedJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'sharedJouneyId', type: () => String! })
@@ -40,7 +42,7 @@ export class SharedJouneyResolver {
   }
 
   @Mutation((returns) => SharedJouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   acceptSharedJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'sharedJouneyId', type: () => String! })
@@ -50,7 +52,7 @@ export class SharedJouneyResolver {
   }
 
   @Mutation((returns) => SharedJouneyGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   shareJouney(
     @GqlGetUser() user: User,
     @Args({ name: 'jouneyId', type: () => String! })
@@ -69,11 +71,17 @@ export class SharedJouneyResolver {
   @Subscription((returns) => SharedJouneyGraphQLType, {
     name: SubscriptionNames.onChangedSharedJouney,
     /** To filter out specific events */
-    async filter(this, payload: SharedJouneySubcriptionDto, variables) {
+    async filter(
+      this: SharedJouneyResolver,
+      payload: SharedJouneySubcriptionDto,
+      variables,
+    ) {
       const { data, event } = payload;
 
       return (
-        data.sharedUser.token == variables.userToken && variables.event == event
+        !this.authService.isTokenExpired(variables.userToken) &&
+        data.sharedUser.token == variables.userToken &&
+        variables.event == event
       );
     },
     /** Mutating subscription payloads */

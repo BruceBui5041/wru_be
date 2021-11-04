@@ -8,7 +8,7 @@ import {
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class MatchStoredToken implements CanActivate {
+export class MatchStoredTokenGuard implements CanActivate {
   constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext) {

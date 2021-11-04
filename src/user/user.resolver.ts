@@ -1,6 +1,6 @@
 import { UseGuards, ValidationPipe } from '@nestjs/common';
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
-import { GqlMatchStoredToken } from '../auth/guards/match-token.guard.gql';
+import { GqlMatchStoredTokenGuard } from '../auth/guards/match-token.guard.gql';
 import { UpdateProfileDto } from '../user-profile/dto/update-profile.dto';
 import { UserProfileService } from '../user-profile/user-profile.service';
 import { AuthService } from '../auth/auth.service';
@@ -19,7 +19,7 @@ export class UserResolver {
   ) {}
 
   @Query((returns) => [UserGraphQLType])
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   searchUsers(
     @GqlGetUser() user: User,
     @Args({ name: 'searchQuery', type: () => String! })
@@ -29,13 +29,13 @@ export class UserResolver {
   }
 
   @Query((returns) => UserGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   fetchUserProfile(@GqlGetUser() user: User): Promise<User> {
     return this.userService.fetchUserProfile(user);
   }
 
   @Mutation((returns) => UserGraphQLType)
-  @UseGuards(GqlAuthGuard, GqlMatchStoredToken)
+  @UseGuards(GqlAuthGuard, GqlMatchStoredTokenGuard)
   async updateUserProfile(
     @GqlGetUser() user: User,
     @Args({ name: 'profile', type: () => UpdateProfileDto }, ValidationPipe)

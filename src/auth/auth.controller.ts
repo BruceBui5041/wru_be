@@ -13,7 +13,7 @@ import { SignInCredentialDto } from './dto/signin-credential.dto';
 import { SignUpCredentialDto } from './dto/signup-credential.dto';
 import { GetUser } from './get-user.decorator';
 import { User } from '../user/user.entity';
-import { MatchStoredToken } from './guards/match-token.guard';
+import { MatchStoredTokenGuard } from './guards/match-token.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -31,7 +31,7 @@ export class AuthController {
   }
 
   @Post('/logout')
-  @UseGuards(AuthGuard(), MatchStoredToken)
+  @UseGuards(MatchStoredTokenGuard, AuthGuard())
   logout(@GetUser() user: User) {
     return this.authService.logOut(user);
   }

@@ -9,7 +9,7 @@ import { GqlExecutionContext } from '@nestjs/graphql';
 import { AuthService } from '../auth.service';
 
 @Injectable()
-export class GqlMatchStoredToken implements CanActivate {
+export class GqlMatchStoredTokenGuard implements CanActivate {
   constructor(@Inject(AuthService) private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext) {
